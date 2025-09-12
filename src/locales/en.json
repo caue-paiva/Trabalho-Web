@@ -1,0 +1,139 @@
+{
+  "navigation": {
+    "home": "Home",
+    "history": "History",
+    "gallery": "Gallery",
+    "codeOfConduct": "Code of Conduct"
+  },
+  "home": {
+    "title": "Welcome to Grupy São Carlos",
+    "subtitle": "A welcoming community for everyone who wants to learn and share knowledge about Python in São Carlos and surrounding areas.",
+    "learnHistory": "Learn our history",
+    "viewEvents": "View upcoming events",
+    "whoWeAre": "Who are we?",
+    "description": "Grupy São Carlos is a Python programming language user community that meets regularly to exchange experiences, learn together and strengthen the regional tech ecosystem.",
+    "community": {
+      "title": "Welcoming Community",
+      "description": "A safe and inclusive space for people of all experience levels, from beginners to experts."
+    },
+    "learning": {
+      "title": "Practical Learning",
+      "description": "Workshops, talks and coding dojos to learn Python in a practical and fun way."
+    },
+    "networking": {
+      "title": "Networking",
+      "description": "Connect with other pythonistas, form partnerships and discover professional opportunities."
+    },
+    "upcomingEvents": "Upcoming Meetups",
+    "eventsDescription": "Our events are always free and open to the public. Come learn, teach and be part of this amazing community!",
+    "features": {
+      "workshops": "Practical workshops with real projects",
+      "talks": "Talks with industry experts",
+      "networking": "Networking and experience sharing",
+      "dojos": "Coding dojos to practice together"
+    },
+    "joinCommunity": "Join our community!",
+    "joinDescription": "Regardless of your experience level with Python, you are welcome here. Come learn, teach and grow with us.",
+    "seePhotos": "See event photos"
+  },
+  "events": {
+    "title": "Upcoming Events",
+    "noEvents": "No events scheduled at the moment. Stay tuned to our social media!",
+    "attendees": "registered",
+    "free": "Free",
+    "learnMore": "Learn more",
+    "viewAll": "View all events"
+  },
+  "history": {
+    "title": "Our History",
+    "subtitle": "Learn about Grupy São Carlos' journey, from its founding to the present day, and how we became a reference in the regional Python community.",
+    "howItStarted": "How it all started",
+    "originStory": "In 2015, a small group of Python enthusiasts in São Carlos realized the need to create a local space to share knowledge and experiences about this language that was growing rapidly in the Brazilian tech scene. Inspired by Python user groups (GruPys) that already existed in other cities like São Paulo, Rio de Janeiro and Campinas, we decided to found Grupy São Carlos with the goal of democratizing access to Python knowledge in the region. What started as informal meetings in cafes and borrowed rooms quickly evolved into a structured community that is now a reference in the interior of São Paulo state.",
+    "ourNumbers": "Our numbers",
+    "timeline": "Timeline",
+    "historicalMoments": "Historical moments",
+    "historicalPhotosDescription": "Some memorable photos from our journey over the years.",
+    "historicalPhoto": "Historical photo",
+    "comingSoon": "Coming soon",
+    "contributePhotos": "Want to contribute historical photos? Contact us!",
+    "achievements": {
+      "events": "50+ Events",
+      "eventsDesc": "Workshops, talks and meetups held",
+      "participants": "500+ Participants",
+      "participantsDesc": "Different people have already participated in our events",
+      "recognition": "National Recognition",
+      "recognitionDesc": "Active participation in the Python Brasil community",
+      "impact": "Regional Impact",
+      "impactDesc": "Reference for São Carlos and region"
+    }
+  },
+  "gallery": {
+    "title": "Photo Gallery",
+    "subtitle": "Relive the best moments from our events and see how our community grows with each meetup.",
+    "contribute": "Contribute photos",
+    "contributeDescription": "Attended an event? Help document our history by sharing your photos!",
+    "createEvent": "Create event and add photos",
+    "newEvent": "Create new event",
+    "newEventDescription": "First, let's create an event to organize your photos.",
+    "eventName": "Event name",
+    "eventNamePlaceholder": "Ex: Python Basics Workshop",
+    "date": "Date",
+    "location": "Location",
+    "locationPlaceholder": "Ex: IFSP São Carlos",
+    "description": "Description",
+    "descriptionPlaceholder": "Brief event description...",
+    "recentEvents": "Recent events",
+    "photos": "photos",
+    "noPhotos": "No photos yet",
+    "addPhotos": "Add photos",
+    "allPhotos": "All photos",
+    "noPhotosYet": "We don't have photos yet",
+    "noPhotosDescription": "Be the first to share photos from our events!",
+    "addFirstPhoto": "Add first photo",
+    "event": "Event"
+  },
+  "codeOfConduct": {
+    "title": "Code of Conduct",
+    "subtitle": "Our commitment to maintaining a welcoming, diverse and respectful community for everyone.",
+    "notice": "This code of conduct applies to all events, online spaces and communications related to Grupy São Carlos.",
+    "mission": "Our mission",
+    "missionDescription": "Grupy São Carlos is committed to being a harassment-free community for everyone, regardless of sex, gender identity and expression, age, sexual orientation, disability, physical appearance, body size, skin color, ethnicity, religion (or lack thereof) or technology choices. We do not tolerate harassment of community participants in any form. Sexual language and images are not appropriate anywhere in the community, including talks, workshops, parties, Twitter and other online media.",
+    "ourValues": "Our values",
+    "expectedBehavior": "Expected behavior",
+    "unacceptableBehavior": "Unacceptable behavior",
+    "reporting": "How to report violations",
+    "reportingDescription": "If you witness or suffer any unacceptable behavior, or have other community-related concerns, contact us immediately:",
+    "contactChannels": "Contact channels:",
+    "confidentiality": "All reports will be treated with confidentiality and seriousness. We will take appropriate measures to deal with the situation fairly and transparently.",
+    "officialVersion": "Complete and official version",
+    "githubDescription": "For the most updated and detailed version of our Code of Conduct, check our official repository on GitHub.",
+    "viewOnGitHub": "View on GitHub",
+    "values": {
+      "inclusion": {
+        "title": "Inclusion and Diversity",
+        "description": "We value the participation of all people, regardless of their experience, gender, sexual orientation, disability, physical appearance, race, ethnicity, age, religion or nationality."
+      },
+      "respect": {
+        "title": "Mutual Respect",
+        "description": "We treat all participants with dignity and respect, creating an environment where everyone feels safe to learn and share."
+      },
+      "safety": {
+        "title": "Safe Environment",
+        "description": "We do not tolerate harassment, discrimination or inappropriate behavior in any form, whether in person or online."
+      }
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}
