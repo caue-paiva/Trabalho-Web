@@ -10,50 +10,52 @@
 
 Estamos desenvolvendo uma página web para o Grupy-Sanca, com o propósito de fortalecer sua presença online e reunir em um só lugar todas as informações relevantes do grupo. O site apresentará sua trajetória, redes sociais, fotos de eventos anteriores e anúncios de futuras atividades, além de oferecer integração com o sistema atual de inscrição em eventos.
 
-**URL**: https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca
 
-## Para edição do código
+### Objetivo
+Fortalecer a presença online do Grupy-Sanca em um único hub simples e acolhedor. Apresentar o grupo, próximos eventos e a memória da comunidade de forma clara e convidativa.
 
-**Usar o Lovable**
+### Público-alvo e jornada
+Pessoas fora da bolha de tech e fora do público universitário, com perfil mais casual. Descobrem o site pela busca, entendem a história do grupo, conferem próximos eventos e se inscrevem.
 
-Basta visitar o [Projeto no Lovable](https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca) e começar a dar prompts.  
-As alterações feitas pelo Lovable serão automaticamente commitadas neste repositório.
+### Páginas do site
 
-**Usar sua IDE preferida**
+1) **Início**  
+Recepção rápida com mensagem clara sobre a comunidade e botões para História e Eventos. Destaque para próximos eventos e links de redes sociais.
 
-Se quiser trabalhar localmente usando sua própria IDE, você pode clonar este repositório e enviar alterações. As mudanças enviadas também serão refletidas no Lovable.  
+2) **História**  
+Resumo de como o Grupy-Sanca surgiu e seus principais marcos. Fotos históricas selecionadas para gerar identificação e confiança.
 
-O único requisito é ter Node.js & npm instalados – [instale com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3) **Galeria**  
+Exploração visual de eventos passados em uma grade simples e intuitiva. Ao abrir uma foto, o visitante entende de qual evento ela veio e o contexto do registro.
 
-Siga estes passos:
+4) **Código de Conduta**  
+Reforço dos valores de respeito, segurança e inclusão. Link direto para a versão oficial do Código de Conduta do Grupy-Sanca.
 
+
+### Princípios de conteúdo e UX
+Linguagem acessível e direta, foco na primeira visita, imagens otimizadas e navegação simples. Convites visíveis para participar de eventos e conhecer mais sobre o grupo.
+
+## Rodando o projeto
+
+OBS: Execute os comandos no root do projeto
+
+### Pré-requisitos
+- Node.js 18+ e npm
+- Git
+
+### Instalação
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
 ```
 
-**Editar um arquivo diretamente no GitHub**
+### Execução do server local
 
-- Navegue até o(s) arquivo(s) desejado(s).  
-- Clique no botão "Edit" (ícone de lápis) no canto superior direito da visualização do arquivo.  
-- Faça suas alterações e dê commit nelas.  
+```sh
+npm run dev -- --port 5173 --host 127.0.0.1 --strictPort
+```
 
-**Usar GitHub Codespaces**
+Agora é só abrir http://127.0.0.1:5173 no seu browser
 
-- Vá até a página principal do seu repositório.  
-- Clique no botão "Code" (botão verde) no canto superior direito.  
-- Selecione a aba "Codespaces".  
-- Clique em "New codespace" para iniciar um novo ambiente Codespace.  
-- Edite os arquivos diretamente no Codespace e faça commit e push das suas alterações quando terminar.  
 
 ## Tecnologias usadas
 
@@ -64,7 +66,3 @@ Este projeto foi construído com:
 - React  
 - shadcn-ui  
 - Tailwind CSS  
-
-## Para o deploy do projeto
-
-Basta abrir o [Lovable](https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca) e clicar em **Share -> Publish**.  
