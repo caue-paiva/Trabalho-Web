@@ -1,14 +1,18 @@
 # Site de apresentação para Grupy-Sanca
 
+## Alunos
+
+- Eduardo Neves Gomes da Silva - 13822710
+- Cauê Paiva Lira - 14675416
+- Guilherme Antonio Costa Bandeira - 14575620
+
 ## Informações do projeto
 
 Estamos desenvolvendo uma página web para o Grupy-Sanca, com o propósito de fortalecer sua presença online e reunir em um só lugar todas as informações relevantes do grupo. O site apresentará sua trajetória, redes sociais, fotos de eventos anteriores e anúncios de futuras atividades, além de oferecer integração com o sistema atual de inscrição em eventos.
 
 **URL**: https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca
 
-## Como posso editar este código?
-
-Existem várias maneiras de editar sua aplicação.
+## Para edição do código
 
 **Usar o Lovable**
 
@@ -51,7 +55,7 @@ npm run dev
 - Clique em "New codespace" para iniciar um novo ambiente Codespace.  
 - Edite os arquivos diretamente no Codespace e faça commit e push das suas alterações quando terminar.  
 
-## Quais tecnologias são usadas neste projeto?
+## Tecnologias usadas
 
 Este projeto foi construído com:
 
@@ -61,14 +65,6 @@ Este projeto foi construído com:
 - shadcn-ui  
 - Tailwind CSS  
 
-## Como posso implantar este projeto?
+## Para o deploy do projeto
 
-Basta abrir o [Lovable](https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca) e clicar em **Share -> Publish**.
-
-## Posso conectar um domínio personalizado ao meu projeto Lovable?
-
-Sim, você pode!  
-
-Para conectar um domínio, vá em **Project > Settings > Domains** e clique em **Connect Domain**.  
-
-Leia mais aqui: [Configurando um domínio personalizado](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)  
+Basta abrir o [Lovable](https://lovable.dev/projects/b7677453-e303-44a5-acac-ea4ec74dc8ca) e clicar em **Share -> Publish**.  
