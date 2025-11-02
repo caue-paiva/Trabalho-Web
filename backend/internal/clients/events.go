@@ -1,4 +1,4 @@
-package gateway
+package clients
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"backend/internal/entities"
+	"backend/internal/service"
 )
 
 const (
@@ -17,7 +18,10 @@ const (
 	jsonAPIAccept = "application/vnd.api+json"
 )
 
-// Filter represents a single filter condition for the API
+// Compile-time interface check
+var _ service.GrupyEventsPort = (*eventsClient)(nil)
+
+// Filter represents a single filter condition for the Grupy API
 // Example: {"name":"starts-at","op":"lt","val":"2025-10-03T21:00:00Z"}
 type Filter struct {
 	Name string `json:"name"` // Field name (e.g., "starts-at", "ends-at", "name")
@@ -25,30 +29,15 @@ type Filter struct {
 	Val  string `json:"val"`  // Value to compare against
 }
 
-// QueryParams represents query parameters for the Grupy Sanca Events API
-type QueryParams struct {
+// queryParams represents internal query parameters for the Grupy Sanca Events API
+type queryParams struct {
 	Sort       string   // Sort field (e.g., "starts-at", "-starts-at" for descending)
 	PageSize   int      // Number of results per page (max 100)
 	PageNumber int      // Page number (1-based)
 	Filters    []Filter // Array of filter conditions
 }
 
-// GrupyEventsAPI implements the gateway for Grupy Sanca Events API
-type GrupyEventsAPI struct {
-	client  *http.Client
-	baseURL string
-}
-
-// NewGrupyEventsAPI creates a new Grupy Sanca Events API gateway
-func NewGrupyEventsAPI() *GrupyEventsAPI {
-	return &GrupyEventsAPI{
-		client:  &http.Client{Timeout: 10 * time.Second},
-		baseURL: grupyBaseURL,
-	}
-}
-
 // JSON:API response structures
-
 type jsonAPIResponse struct {
 	Meta struct {
 		Count int `json:"count"`
@@ -80,10 +69,29 @@ type jsonAPIEventAttrs struct {
 	CreatedAt         string  `json:"created-at"`
 }
 
-// GetEvents fetches events from Grupy Sanca API using QueryParams
-func (g *GrupyEventsAPI) GetEvents(ctx context.Context, params QueryParams) ([]entities.Event, error) {
+type eventsClient struct {
+	httpClient *http.Client
+	baseURL    string
+}
+
+// NewEventsClient creates a new GrupyEventsPort implementation
+func NewEventsClient() service.GrupyEventsPort {
+	return &eventsClient{
+		httpClient: &http.Client{Timeout: 10 * time.Second},
+		baseURL:    grupyBaseURL,
+	}
+}
+
+// GetEvents fetches events from Grupy Sanca API
+func (c *eventsClient) GetEvents(ctx context.Context, limit int, orderBy string, desc bool) ([]entities.Event, error) {
+	// Build query parameters
+	params := queryParams{
+		Sort:     c.buildSortParam(orderBy, desc),
+		PageSize: limit,
+	}
+
 	// Build URL with query parameters
-	apiURL, err := g.buildEventsURLFromParams(params)
+	apiURL, err := c.buildEventsURL(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build URL: %w", err)
 	}
@@ -98,7 +106,7 @@ func (g *GrupyEventsAPI) GetEvents(ctx context.Context, params QueryParams) ([]e
 	req.Header.Set("Accept", jsonAPIAccept)
 
 	// Execute request
-	resp, err := g.client.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch events: %w", err)
 	}
@@ -118,7 +126,7 @@ func (g *GrupyEventsAPI) GetEvents(ctx context.Context, params QueryParams) ([]e
 	// Map to entities
 	events := make([]entities.Event, 0, len(apiResp.Data))
 	for _, data := range apiResp.Data {
-		event, err := g.mapToEntity(data)
+		event, err := c.mapToEntity(data)
 		if err != nil {
 			// Log error but continue processing other events
 			continue
@@ -129,9 +137,31 @@ func (g *GrupyEventsAPI) GetEvents(ctx context.Context, params QueryParams) ([]e
 	return events, nil
 }
 
-// buildEventsURLFromParams constructs the API URL with QueryParams
-func (g *GrupyEventsAPI) buildEventsURLFromParams(params QueryParams) (string, error) {
-	endpoint := g.baseURL + "/events"
+// buildSortParam converts orderBy field and desc flag to API sort parameter
+func (c *eventsClient) buildSortParam(orderBy string, desc bool) string {
+	// Map our field names to API field names
+	var apiField string
+	switch orderBy {
+	case "startDate":
+		apiField = "starts-at"
+	case "name":
+		apiField = "name"
+	case "created":
+		apiField = "created-at"
+	default:
+		apiField = "starts-at"
+	}
+
+	// Prefix with "-" for descending order
+	if desc {
+		return "-" + apiField
+	}
+	return apiField
+}
+
+// buildEventsURL constructs the API URL with query parameters
+func (c *eventsClient) buildEventsURL(params queryParams) (string, error) {
+	endpoint := c.baseURL + "/events"
 	queryParams := url.Values{}
 
 	// Add filters as JSON array
@@ -168,22 +198,8 @@ func (g *GrupyEventsAPI) buildEventsURLFromParams(params QueryParams) (string, e
 	return endpoint, nil
 }
 
-// mapSortField maps our sort field names to API field names
-func (g *GrupyEventsAPI) mapSortField(orderBy string) string {
-	switch orderBy {
-	case "startDate":
-		return "starts-at"
-	case "name":
-		return "name"
-	case "created":
-		return "created-at"
-	default:
-		return "starts-at"
-	}
-}
-
 // mapToEntity maps JSON:API event data to our Event entity
-func (g *GrupyEventsAPI) mapToEntity(data jsonAPIEventData) (entities.Event, error) {
+func (c *eventsClient) mapToEntity(data jsonAPIEventData) (entities.Event, error) {
 	attrs := data.Attributes
 
 	// Parse timestamps
