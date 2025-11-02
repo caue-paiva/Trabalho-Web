@@ -22,15 +22,17 @@ func main() {
 
 	// Initialize dependencies
 	eventsClient := clients.NewEventsClient()
-	eventsService := service.NewEventsService(eventsClient)
 
-	// Note: TextContentService and ImageService are nil since we haven't implemented DB/ObjectStore yet
+	// Note: DB and ObjectStore are nil since we haven't wired them up yet
 	// Only the /events endpoint will work for now
-	var textContentService service.TextContentService = nil
-	var imageService service.ImageService = nil
+	var db service.DBPort = nil
+	var objectStore service.ObjectStorePort = nil
+
+	// Create unified server
+	server := service.NewServer(db, objectStore, eventsClient)
 
 	// Create HTTP router
-	handler := httpHandler.NewRouter(textContentService, imageService, eventsService)
+	handler := httpHandler.NewRouter(server)
 
 	// Configure server
 	srv := &http.Server{

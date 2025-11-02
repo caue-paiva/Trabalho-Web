@@ -10,16 +10,16 @@ import (
 )
 
 type TimelineHandler struct {
-	textContentService service.TextContentService
+	server service.Server
 }
 
-func NewTimelineHandler(svc service.TextContentService) *TimelineHandler {
-	return &TimelineHandler{textContentService: svc}
+func NewTimelineHandler(server service.Server) *TimelineHandler {
+	return &TimelineHandler{server: server}
 }
 
 // ListTimelineEntries handles GET /api/v1/timelineentries
 func (h *TimelineHandler) ListTimelineEntries(w http.ResponseWriter, r *http.Request) {
-	entries, err := h.textContentService.ListTimelineEntries(r.Context())
+	entries, err := h.server.ListTimelineEntries(r.Context())
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -33,7 +33,7 @@ func (h *TimelineHandler) ListTimelineEntries(w http.ResponseWriter, r *http.Req
 func (h *TimelineHandler) GetTimelineEntryByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	entry, err := h.textContentService.GetTimelineEntryByID(r.Context(), id)
+	entry, err := h.server.GetTimelineEntryByID(r.Context(), id)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -57,7 +57,7 @@ func (h *TimelineHandler) CreateTimelineEntry(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	created, err := h.textContentService.CreateTimelineEntry(r.Context(), entity)
+	created, err := h.server.CreateTimelineEntry(r.Context(), entity)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -83,7 +83,7 @@ func (h *TimelineHandler) UpdateTimelineEntry(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	updated, err := h.textContentService.UpdateTimelineEntry(r.Context(), id, entity)
+	updated, err := h.server.UpdateTimelineEntry(r.Context(), id, entity)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -97,7 +97,7 @@ func (h *TimelineHandler) UpdateTimelineEntry(w http.ResponseWriter, r *http.Req
 func (h *TimelineHandler) DeleteTimelineEntry(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	if err := h.textContentService.DeleteTimelineEntry(r.Context(), id); err != nil {
+	if err := h.server.DeleteTimelineEntry(r.Context(), id); err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
 	}

@@ -10,11 +10,11 @@ import (
 )
 
 type EventsHandler struct {
-	eventsService service.EventsService
+	server service.Server
 }
 
-func NewEventsHandler(svc service.EventsService) *EventsHandler {
-	return &EventsHandler{eventsService: svc}
+func NewEventsHandler(server service.Server) *EventsHandler {
+	return &EventsHandler{server: server}
 }
 
 // GetEvents handles GET /api/v1/events?limit=N&orderBy=field&desc=true
@@ -40,7 +40,7 @@ func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call service
-	events, err := h.eventsService.GetEvents(r.Context(), limit, orderBy, desc)
+	events, err := h.server.GetEvents(r.Context(), limit, orderBy, desc)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return

@@ -8,42 +8,20 @@ import (
 	"backend/internal/entities"
 )
 
-// ImageService defines business logic for image operations
-type ImageService interface {
-	GetImageByID(ctx context.Context, id string) (entities.Image, error)
-	GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error)
-	UploadImage(ctx context.Context, meta entities.Image, data []byte) (entities.Image, error)
-	UpdateImage(ctx context.Context, id string, meta entities.Image, data []byte) (entities.Image, error)
-	DeleteImage(ctx context.Context, id string) error
-}
+// =======================
+// IMAGE OPERATIONS
+// =======================
 
-// imageService implements ImageService
-type imageService struct {
-	db  DBPort
-	obj ObjectStorePort
-}
-
-// NewImageService creates a new ImageService
-func NewImageService(db DBPort, obj ObjectStorePort) ImageService {
-	return &imageService{
-		db:  db,
-		obj: obj,
-	}
-}
-
-// GetImageByID retrieves an image by ID
-func (s *imageService) GetImageByID(ctx context.Context, id string) (entities.Image, error) {
+func (s *server) GetImageByID(ctx context.Context, id string) (entities.Image, error) {
 	return s.db.GetImageByID(ctx, id)
 }
 
-// GetImagesByGallerySlug retrieves all images for a gallery
-func (s *imageService) GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error) {
+func (s *server) GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error) {
 	normalized := normalizeSlug(slug)
 	return s.db.GetImagesByGallerySlug(ctx, normalized)
 }
 
-// UploadImage uploads a new image to object storage and persists metadata
-func (s *imageService) UploadImage(ctx context.Context, meta entities.Image, data []byte) (entities.Image, error) {
+func (s *server) UploadImage(ctx context.Context, meta entities.Image, data []byte) (entities.Image, error) {
 	// Business logic: generate object key with timestamp
 	key := generateObjectKey(meta.Slug)
 
@@ -75,8 +53,7 @@ func (s *imageService) UploadImage(ctx context.Context, meta entities.Image, dat
 	return created, nil
 }
 
-// UpdateImage updates image metadata and optionally uploads new image data
-func (s *imageService) UpdateImage(ctx context.Context, id string, meta entities.Image, data []byte) (entities.Image, error) {
+func (s *server) UpdateImage(ctx context.Context, id string, meta entities.Image, data []byte) (entities.Image, error) {
 	// If new image data provided, upload it
 	if len(data) > 0 {
 		// Validate size
@@ -110,8 +87,7 @@ func (s *imageService) UpdateImage(ctx context.Context, id string, meta entities
 	return s.db.UpdateImageMeta(ctx, id, meta)
 }
 
-// DeleteImage deletes an image and its object storage data
-func (s *imageService) DeleteImage(ctx context.Context, id string) error {
+func (s *server) DeleteImage(ctx context.Context, id string) error {
 	// Get image to retrieve object key
 	img, err := s.db.GetImageByID(ctx, id)
 	if err != nil {
