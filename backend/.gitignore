@@ -33,3 +33,7 @@ Thumbs.db
 
 # Config
 configs/*.local.yaml
+
+#json and other secrets
+*.json
+**firebase**
