@@ -1,6 +1,6 @@
 # Firestore Repository
 
-This package provides a Firestore implementation of the `service.DBPort` interface.
+This package provides a Firestore implementation of the `server.DBPort` interface.
 
 ## Setup
 
@@ -56,7 +56,7 @@ import (
     "log"
 
     "backend/internal/repository/firestore"
-    "backend/internal/service"
+    "backend/internal/server"
 )
 
 func main() {
@@ -76,11 +76,10 @@ func main() {
     // Create DB repository
     dbRepo := firestore.NewDBRepository(firestoreClient)
 
-    // Create services
-    textContentService := service.NewTextContentService(dbRepo)
-    imageService := service.NewImageService(dbRepo, objectStorePort)
+    // Create server with all dependencies
+    srv := server.NewServer(dbRepo, objectStorePort, eventsClient)
 
-    // Use services...
+    // Use server...
 }
 ```
 

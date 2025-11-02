@@ -5,18 +5,18 @@ import (
 	"fmt"
 
 	"backend/internal/entities"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 // Compile-time interface check
-var _ service.DBPort = (*dbClient)(nil)
+var _ server.DBPort = (*dbClient)(nil)
 
 type dbClient struct {
 	// Future: repository dependencies
 }
 
 // NewDBClient creates a new DBPort implementation (stub)
-func NewDBClient() service.DBPort {
+func NewDBClient() server.DBPort {
 	return &dbClient{}
 }
 

@@ -6,15 +6,15 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 type TimelineHandler struct {
-	server service.Server
+	server server.Server
 }
 
-func NewTimelineHandler(server service.Server) *TimelineHandler {
-	return &TimelineHandler{server: server}
+func NewTimelineHandler(srv server.Server) *TimelineHandler {
+	return &TimelineHandler{server: srv}
 }
 
 // ListTimelineEntries handles GET /api/v1/timelineentries

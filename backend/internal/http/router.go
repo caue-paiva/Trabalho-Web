@@ -5,18 +5,18 @@ import (
 
 	"backend/internal/http/handlers"
 	"backend/internal/platform/middleware"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 // NewRouter creates and configures the HTTP router
-func NewRouter(server service.Server) http.Handler {
+func NewRouter(srv server.Server) http.Handler {
 	mux := http.NewServeMux()
 
 	// Create handlers
-	textsHandler := handlers.NewTextsHandler(server)
-	imagesHandler := handlers.NewImagesHandler(server)
-	timelineHandler := handlers.NewTimelineHandler(server)
-	eventsHandler := handlers.NewEventsHandler(server)
+	textsHandler := handlers.NewTextsHandler(srv)
+	imagesHandler := handlers.NewImagesHandler(srv)
+	timelineHandler := handlers.NewTimelineHandler(srv)
+	eventsHandler := handlers.NewEventsHandler(srv)
 
 	// Register routes using Go 1.22+ pattern matching
 

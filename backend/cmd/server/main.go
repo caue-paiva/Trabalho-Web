@@ -11,7 +11,7 @@ import (
 
 	"backend/internal/clients"
 	httpHandler "backend/internal/http"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 func main() {
@@ -25,17 +25,17 @@ func main() {
 
 	// Note: DB and ObjectStore are nil since we haven't wired them up yet
 	// Only the /events endpoint will work for now
-	var db service.DBPort = nil
-	var objectStore service.ObjectStorePort = nil
+	var db server.DBPort = nil
+	var objectStore server.ObjectStorePort = nil
 
 	// Create unified server
-	server := service.NewServer(db, objectStore, eventsClient)
+	srv := server.NewServer(db, objectStore, eventsClient)
 
 	// Create HTTP router
-	handler := httpHandler.NewRouter(server)
+	handler := httpHandler.NewRouter(srv)
 
-	// Configure server
-	srv := &http.Server{
+	// Configure HTTP server
+	httpSrv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
@@ -47,7 +47,7 @@ func main() {
 	go func() {
 		log.Printf("Server listening on port %s", port)
 		log.Printf("Events API available at: http://localhost:%s/api/v1/events", port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server failed to start: %v", err)
 		}
 	}()
@@ -63,7 +63,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := httpSrv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 

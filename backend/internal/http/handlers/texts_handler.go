@@ -6,15 +6,15 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 type TextsHandler struct {
-	server service.Server
+	server server.Server
 }
 
-func NewTextsHandler(server service.Server) *TextsHandler {
-	return &TextsHandler{server: server}
+func NewTextsHandler(srv server.Server) *TextsHandler {
+	return &TextsHandler{server: srv}
 }
 
 // ListTexts handles GET /api/v1/texts

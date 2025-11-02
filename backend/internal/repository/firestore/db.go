@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/status"
 
 	"backend/internal/entities"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
-// Compile-time check that DBRepository implements service.DBPort
-var _ service.DBPort = (*DBRepository)(nil)
+// Compile-time check that DBRepository implements server.DBPort
+var _ server.DBPort = (*DBRepository)(nil)
 
 // Collection names
 const (
@@ -24,7 +24,7 @@ const (
 	timelineEntriesCollection = "timeline_entries"
 )
 
-// DBRepository implements service.DBPort using Firestore
+// DBRepository implements server.DBPort using Firestore
 type DBRepository struct {
 	client *firestore.Client
 }

@@ -4,18 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 // Compile-time interface check
-var _ service.ObjectStorePort = (*objectClient)(nil)
+var _ server.ObjectStorePort = (*objectClient)(nil)
 
 type objectClient struct {
 	// Future: gateway dependencies
 }
 
 // NewObjectClient creates a new ObjectStorePort implementation (stub)
-func NewObjectClient() service.ObjectStorePort {
+func NewObjectClient() server.ObjectStorePort {
 	return &objectClient{}
 }
 

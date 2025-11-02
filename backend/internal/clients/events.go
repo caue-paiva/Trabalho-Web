@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"backend/internal/entities"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 )
 
 // Compile-time interface check
-var _ service.GrupyEventsPort = (*eventsClient)(nil)
+var _ server.GrupyEventsPort = (*eventsClient)(nil)
 
 // Filter represents a single filter condition for the Grupy API
 // Example: {"name":"starts-at","op":"lt","val":"2025-10-03T21:00:00Z"}
@@ -75,7 +75,7 @@ type eventsClient struct {
 }
 
 // NewEventsClient creates a new GrupyEventsPort implementation
-func NewEventsClient() service.GrupyEventsPort {
+func NewEventsClient() server.GrupyEventsPort {
 	return &eventsClient{
 		httpClient: &http.Client{Timeout: 10 * time.Second},
 		baseURL:    grupyBaseURL,

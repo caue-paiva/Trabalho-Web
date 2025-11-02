@@ -6,15 +6,15 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 type EventsHandler struct {
-	server service.Server
+	server server.Server
 }
 
-func NewEventsHandler(server service.Server) *EventsHandler {
-	return &EventsHandler{server: server}
+func NewEventsHandler(srv server.Server) *EventsHandler {
+	return &EventsHandler{server: srv}
 }
 
 // GetEvents handles GET /api/v1/events?limit=N&orderBy=field&desc=true

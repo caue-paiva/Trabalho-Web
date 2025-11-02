@@ -6,15 +6,15 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/service"
+	"backend/internal/server"
 )
 
 type ImagesHandler struct {
-	server service.Server
+	server server.Server
 }
 
-func NewImagesHandler(server service.Server) *ImagesHandler {
-	return &ImagesHandler{server: server}
+func NewImagesHandler(srv server.Server) *ImagesHandler {
+	return &ImagesHandler{server: srv}
 }
 
 // GetImageByID handles GET /api/v1/images/{id}
