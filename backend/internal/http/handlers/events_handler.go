@@ -30,10 +30,7 @@ func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	orderBy := query.Get("orderBy")
-	if orderBy == "" {
-		orderBy = "starts-at" // Use exact Grupy API field name
-	}
+	orderBy := query.Get("orderBy") // Pass through, default handled at client level
 
 	desc := false
 	if descStr := query.Get("desc"); descStr == "true" {
