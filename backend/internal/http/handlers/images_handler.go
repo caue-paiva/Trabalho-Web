@@ -10,18 +10,18 @@ import (
 )
 
 type ImagesHandler struct {
-	contentService service.ContentService
+	imageService service.ImageService
 }
 
-func NewImagesHandler(svc service.ContentService) *ImagesHandler {
-	return &ImagesHandler{contentService: svc}
+func NewImagesHandler(svc service.ImageService) *ImagesHandler {
+	return &ImagesHandler{imageService: svc}
 }
 
 // GetImageByID handles GET /api/v1/images/{id}
 func (h *ImagesHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	img, err := h.contentService.GetImageByID(r.Context(), id)
+	img, err := h.imageService.GetImageByID(r.Context(), id)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -35,7 +35,7 @@ func (h *ImagesHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
 func (h *ImagesHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Request) {
 	slug := extractPathParam(r, "slug")
 
-	images, err := h.contentService.GetImagesByGallerySlug(r.Context(), slug)
+	images, err := h.imageService.GetImagesByGallerySlug(r.Context(), slug)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -59,7 +59,7 @@ func (h *ImagesHandler) CreateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	created, err := h.contentService.UploadImage(r.Context(), meta, data)
+	created, err := h.imageService.UploadImage(r.Context(), meta, data)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -85,7 +85,7 @@ func (h *ImagesHandler) UpdateImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updated, err := h.contentService.UpdateImage(r.Context(), id, meta, data)
+	updated, err := h.imageService.UpdateImage(r.Context(), id, meta, data)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -99,7 +99,7 @@ func (h *ImagesHandler) UpdateImage(w http.ResponseWriter, r *http.Request) {
 func (h *ImagesHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	if err := h.contentService.DeleteImage(r.Context(), id); err != nil {
+	if err := h.imageService.DeleteImage(r.Context(), id); err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
 	}

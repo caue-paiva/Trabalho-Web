@@ -24,12 +24,13 @@ func main() {
 	eventsClient := clients.NewEventsClient()
 	eventsService := service.NewEventsService(eventsClient)
 
-	// Note: ContentService is nil since we haven't implemented DB/ObjectStore yet
+	// Note: TextContentService and ImageService are nil since we haven't implemented DB/ObjectStore yet
 	// Only the /events endpoint will work for now
-	var contentService service.ContentService = nil
+	var textContentService service.TextContentService = nil
+	var imageService service.ImageService = nil
 
 	// Create HTTP router
-	handler := httpHandler.NewRouter(contentService, eventsService)
+	handler := httpHandler.NewRouter(textContentService, imageService, eventsService)
 
 	// Configure server
 	srv := &http.Server{

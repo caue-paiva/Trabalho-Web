@@ -10,16 +10,16 @@ import (
 )
 
 type TextsHandler struct {
-	contentService service.ContentService
+	textContentService service.TextContentService
 }
 
-func NewTextsHandler(svc service.ContentService) *TextsHandler {
-	return &TextsHandler{contentService: svc}
+func NewTextsHandler(svc service.TextContentService) *TextsHandler {
+	return &TextsHandler{textContentService: svc}
 }
 
 // ListTexts handles GET /api/v1/texts
 func (h *TextsHandler) ListTexts(w http.ResponseWriter, r *http.Request) {
-	texts, err := h.contentService.ListAllTexts(r.Context())
+	texts, err := h.textContentService.ListAllTexts(r.Context())
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -33,7 +33,7 @@ func (h *TextsHandler) ListTexts(w http.ResponseWriter, r *http.Request) {
 func (h *TextsHandler) GetTextBySlug(w http.ResponseWriter, r *http.Request) {
 	slug := extractPathParam(r, "slug")
 
-	text, err := h.contentService.GetTextBySlug(r.Context(), slug)
+	text, err := h.textContentService.GetTextBySlug(r.Context(), slug)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -47,7 +47,7 @@ func (h *TextsHandler) GetTextBySlug(w http.ResponseWriter, r *http.Request) {
 func (h *TextsHandler) GetTextByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	text, err := h.contentService.GetTextByID(r.Context(), id)
+	text, err := h.textContentService.GetTextByID(r.Context(), id)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -61,7 +61,7 @@ func (h *TextsHandler) GetTextByID(w http.ResponseWriter, r *http.Request) {
 func (h *TextsHandler) GetTextsByPageID(w http.ResponseWriter, r *http.Request) {
 	pageID := extractPathParam(r, "pageId")
 
-	texts, err := h.contentService.GetTextsByPageID(r.Context(), pageID)
+	texts, err := h.textContentService.GetTextsByPageID(r.Context(), pageID)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -75,7 +75,7 @@ func (h *TextsHandler) GetTextsByPageID(w http.ResponseWriter, r *http.Request) 
 func (h *TextsHandler) GetTextsByPageSlug(w http.ResponseWriter, r *http.Request) {
 	pageSlug := extractPathParam(r, "pageSlug")
 
-	texts, err := h.contentService.GetTextsByPageSlug(r.Context(), pageSlug)
+	texts, err := h.textContentService.GetTextsByPageSlug(r.Context(), pageSlug)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -94,7 +94,7 @@ func (h *TextsHandler) CreateText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entity := mapper.ToTextEntity(req)
-	created, err := h.contentService.CreateText(r.Context(), entity)
+	created, err := h.textContentService.CreateText(r.Context(), entity)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -115,7 +115,7 @@ func (h *TextsHandler) UpdateText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entity := mapper.ToTextUpdateEntity(req)
-	updated, err := h.contentService.UpdateText(r.Context(), id, entity)
+	updated, err := h.textContentService.UpdateText(r.Context(), id, entity)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
@@ -129,7 +129,7 @@ func (h *TextsHandler) UpdateText(w http.ResponseWriter, r *http.Request) {
 func (h *TextsHandler) DeleteText(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
-	if err := h.contentService.DeleteText(r.Context(), id); err != nil {
+	if err := h.textContentService.DeleteText(r.Context(), id); err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return
 	}

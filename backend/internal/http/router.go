@@ -9,13 +9,13 @@ import (
 )
 
 // NewRouter creates and configures the HTTP router
-func NewRouter(contentService service.ContentService, eventsService service.EventsService) http.Handler {
+func NewRouter(textContentService service.TextContentService, imageService service.ImageService, eventsService service.EventsService) http.Handler {
 	mux := http.NewServeMux()
 
 	// Create handlers
-	textsHandler := handlers.NewTextsHandler(contentService)
-	imagesHandler := handlers.NewImagesHandler(contentService)
-	timelineHandler := handlers.NewTimelineHandler(contentService)
+	textsHandler := handlers.NewTextsHandler(textContentService)
+	imagesHandler := handlers.NewImagesHandler(imageService)
+	timelineHandler := handlers.NewTimelineHandler(textContentService)
 	eventsHandler := handlers.NewEventsHandler(eventsService)
 
 	// Register routes using Go 1.22+ pattern matching
