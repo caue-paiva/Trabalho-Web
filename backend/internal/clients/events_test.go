@@ -27,7 +27,7 @@ func TestEventsClient_GetEvents_ContractValidation(t *testing.T) {
 	defer cancel()
 
 	// Act
-	events, err := client.GetEvents(ctx, 10, "startDate", false)
+	events, err := client.GetEvents(ctx, 10, "starts-at", false)
 
 	// Assert - Critical checks that should stop the test
 	require.NoError(t, err, "API call should not fail")
@@ -86,21 +86,21 @@ func TestEventsClient_GetEvents_DifferentQueries(t *testing.T) {
 		{
 			name:    "default query with limit 10",
 			limit:   10,
-			orderBy: "startDate",
+			orderBy: "starts-at",
 			desc:    false,
 			wantErr: false,
 		},
 		{
 			name:    "large limit (50)",
 			limit:   50,
-			orderBy: "startDate",
+			orderBy: "starts-at",
 			desc:    false,
 			wantErr: false,
 		},
 		{
 			name:    "descending order by start date",
 			limit:   10,
-			orderBy: "startDate",
+			orderBy: "starts-at",
 			desc:    true,
 			wantErr: false,
 		},
@@ -114,14 +114,14 @@ func TestEventsClient_GetEvents_DifferentQueries(t *testing.T) {
 		{
 			name:    "sort by created date descending",
 			limit:   10,
-			orderBy: "created",
+			orderBy: "created-at",
 			desc:    true,
 			wantErr: false,
 		},
 		{
 			name:    "maximum limit (100)",
 			limit:   100,
-			orderBy: "startDate",
+			orderBy: "starts-at",
 			desc:    false,
 			wantErr: false,
 		},
@@ -144,16 +144,16 @@ func TestEventsClient_GetEvents_DifferentQueries(t *testing.T) {
 			assert.LessOrEqual(t, len(events), tt.limit, "Should not exceed requested limit")
 
 			// Validate sort order if we have multiple events
-			if len(events) > 1 && tt.orderBy == "startDate" {
+			if len(events) > 1 && tt.orderBy == "starts-at" {
 				for i := 0; i < len(events)-1; i++ {
 					if tt.desc {
 						assert.True(t,
 							events[i].StartsAt.After(events[i+1].StartsAt) || events[i].StartsAt.Equal(events[i+1].StartsAt),
-							"Events should be sorted by StartDate descending")
+							"Events should be sorted by starts-at descending")
 					} else {
 						assert.True(t,
 							events[i].StartsAt.Before(events[i+1].StartsAt) || events[i].StartsAt.Equal(events[i+1].StartsAt),
-							"Events should be sorted by StartDate ascending")
+							"Events should be sorted by starts-at ascending")
 					}
 				}
 			}
@@ -321,14 +321,16 @@ func TestEventsClient_BuildSortParam(t *testing.T) {
 		desc    bool
 		want    string
 	}{
-		{"startDate ascending", "startDate", false, "starts-at"},
-		{"startDate descending", "startDate", true, "-starts-at"},
+		{"starts-at ascending", "starts-at", false, "starts-at"},
+		{"starts-at descending", "starts-at", true, "-starts-at"},
 		{"name ascending", "name", false, "name"},
 		{"name descending", "name", true, "-name"},
-		{"created ascending", "created", false, "created-at"},
-		{"created descending", "created", true, "-created-at"},
-		{"unknown field defaults to starts-at", "unknown", false, "starts-at"},
-		{"unknown field descending", "unknown", true, "-starts-at"},
+		{"created-at ascending", "created-at", false, "created-at"},
+		{"created-at descending", "created-at", true, "-created-at"},
+		{"ends-at ascending", "ends-at", false, "ends-at"},
+		{"ends-at descending", "ends-at", true, "-ends-at"},
+		{"empty field defaults to starts-at", "", false, "starts-at"},
+		{"empty field descending", "", true, "-starts-at"},
 	}
 
 	for _, tt := range tests {

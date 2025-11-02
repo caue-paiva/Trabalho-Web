@@ -17,7 +17,8 @@ func NewEventsHandler(srv server.Server) *EventsHandler {
 	return &EventsHandler{server: srv}
 }
 
-// GetEvents handles GET /api/v1/events?limit=N&orderBy=field&desc=true
+// GetEvents handles GET /api/v1/events?limit=N&orderBy=starts-at&desc=true
+// Follows the same logic as the Grupy API query and filter field names: starts-at, ends-at, name, created-at, etc.
 func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
 	query := r.URL.Query()
@@ -31,7 +32,7 @@ func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
 
 	orderBy := query.Get("orderBy")
 	if orderBy == "" {
-		orderBy = "startDate"
+		orderBy = "starts-at" // Use exact Grupy API field name
 	}
 
 	desc := false

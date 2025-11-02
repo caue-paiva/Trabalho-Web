@@ -138,25 +138,18 @@ func (c *eventsClient) GetEvents(ctx context.Context, limit int, orderBy string,
 }
 
 // buildSortParam converts orderBy field and desc flag to API sort parameter
+// No field name translation - we use exact Grupy API field names (starts-at, ends-at, etc.)
 func (c *eventsClient) buildSortParam(orderBy string, desc bool) string {
-	// Map our field names to API field names
-	var apiField string
-	switch orderBy {
-	case "startDate":
-		apiField = "starts-at"
-	case "name":
-		apiField = "name"
-	case "created":
-		apiField = "created-at"
-	default:
-		apiField = "starts-at"
+	// Use orderBy directly (already using Grupy API field names)
+	if orderBy == "" {
+		orderBy = "starts-at"
 	}
 
 	// Prefix with "-" for descending order
 	if desc {
-		return "-" + apiField
+		return "-" + orderBy
 	}
-	return apiField
+	return orderBy
 }
 
 // buildEventsURL constructs the API URL with query parameters

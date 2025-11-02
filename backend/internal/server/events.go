@@ -17,7 +17,7 @@ func (s *server) GetEvents(ctx context.Context, limit int, orderBy string, desc 
 	}
 
 	if orderBy == "" {
-		orderBy = "startDate"
+		orderBy = "starts-at" // Use exact Grupy API field name
 	}
 
 	// Delegate to port
