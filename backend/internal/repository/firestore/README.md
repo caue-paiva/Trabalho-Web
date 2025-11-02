@@ -27,11 +27,16 @@ You can authenticate in two ways:
 
 #### Option A: Service Account File (Recommended for Development)
 ```go
-client, err := firestore.NewFirestoreClient(
-    ctx,
-    "your-project-id",
-    "path/to/serviceAccountKey.json",
-)
+config := firestore.FirestoreConfig{
+    ProjectID:       "your-project-id",
+    CredentialsPath: "path/to/serviceAccountKey.json",
+    Collections: firestore.CollectionNames{
+        Texts:           "texts",
+        Images:          "images",
+        TimelineEntries: "timeline_entries",
+    },
+}
+client, err := firestore.NewFirestoreClient(ctx, config)
 ```
 
 #### Option B: Application Default Credentials (Recommended for Production/GCP)
@@ -39,11 +44,16 @@ client, err := firestore.NewFirestoreClient(
 // Set GOOGLE_APPLICATION_CREDENTIALS environment variable
 // export GOOGLE_APPLICATION_CREDENTIALS="/path/to/serviceAccountKey.json"
 
-client, err := firestore.NewFirestoreClient(
-    ctx,
-    "your-project-id",
-    "", // Empty string uses default credentials
-)
+config := firestore.FirestoreConfig{
+    ProjectID:       "your-project-id",
+    CredentialsPath: "", // Empty string uses default credentials
+    Collections: firestore.CollectionNames{
+        Texts:           "texts",
+        Images:          "images",
+        TimelineEntries: "timeline_entries",
+    },
+}
+client, err := firestore.NewFirestoreClient(ctx, config)
 ```
 
 ### 4. Usage Example
@@ -62,19 +72,29 @@ import (
 func main() {
     ctx := context.Background()
 
+    // Configure collection names
+    collections := firestore.CollectionNames{
+        Texts:           "texts",
+        Images:          "images",
+        TimelineEntries: "timeline_entries",
+    }
+
+    // Configure Firestore client
+    config := firestore.FirestoreConfig{
+        ProjectID:       "your-project-id",
+        CredentialsPath: "configs/serviceAccountKey.json",
+        Collections:     collections,
+    }
+
     // Initialize Firestore client
-    firestoreClient, err := firestore.NewFirestoreClient(
-        ctx,
-        "your-project-id",
-        "configs/serviceAccountKey.json",
-    )
+    firestoreClient, err := firestore.NewFirestoreClient(ctx, config)
     if err != nil {
         log.Fatalf("Failed to create Firestore client: %v", err)
     }
     defer firestoreClient.Close()
 
-    // Create DB repository
-    dbRepo := firestore.NewDBRepository(firestoreClient)
+    // Create DB repository with collection names
+    dbRepo := firestore.NewDBRepository(firestoreClient, collections)
 
     // Create server with all dependencies
     srv := server.NewServer(dbRepo, objectStorePort, eventsClient)
@@ -85,7 +105,7 @@ func main() {
 
 ## Collections Structure
 
-The repository creates the following Firestore collections:
+The repository uses configurable collection names that you provide when initializing the client. The default names are:
 
 - **texts**: Text content blocks
   - Fields: `id`, `slug`, `content`, `pageID`, `pageSlug`, `createdAt`, `updatedAt`, `lastUpdatedBy`
@@ -95,6 +115,26 @@ The repository creates the following Firestore collections:
 
 - **timeline_entries**: Timeline events
   - Fields: `id`, `name`, `text`, `location`, `date`, `createdAt`, `updatedAt`, `lastUpdatedBy`
+
+### Custom Collection Names
+
+You can customize collection names for different environments (dev, staging, prod):
+
+```go
+// Development environment
+devCollections := firestore.CollectionNames{
+    Texts:           "dev_texts",
+    Images:          "dev_images",
+    TimelineEntries: "dev_timeline_entries",
+}
+
+// Production environment
+prodCollections := firestore.CollectionNames{
+    Texts:           "texts",
+    Images:          "images",
+    TimelineEntries: "timeline_entries",
+}
+```
 
 ## Security Rules (Production)
 
@@ -133,7 +173,16 @@ Then connect to the emulator:
 // Set environment variable
 os.Setenv("FIRESTORE_EMULATOR_HOST", "localhost:8080")
 
-client, err := firestore.NewFirestoreClient(ctx, "demo-project", "")
+config := firestore.FirestoreConfig{
+    ProjectID:       "demo-project",
+    CredentialsPath: "",
+    Collections: firestore.CollectionNames{
+        Texts:           "texts",
+        Images:          "images",
+        TimelineEntries: "timeline_entries",
+    },
+}
+client, err := firestore.NewFirestoreClient(ctx, config)
 ```
 
 ## Error Handling

@@ -9,9 +9,25 @@ import (
 	"google.golang.org/api/option"
 )
 
+// CollectionNames holds the names of Firestore collections
+type CollectionNames struct {
+	Texts           string
+	Images          string
+	TimelineEntries string
+}
+
+// FirestoreConfig holds configuration for Firestore client initialization
+type FirestoreConfig struct {
+	ProjectID       string
+	CredentialsPath string
+	Collections     CollectionNames
+}
+
 // NewFirestoreClient creates a new Firestore client
 // credentialsPath should point to your Firebase service account JSON key file
-func NewFirestoreClient(ctx context.Context, projectID string, credentialsPath string) (*firestore.Client, error) {
+func NewFirestoreClient(ctx context.Context, config FirestoreConfig) (*firestore.Client, error) {
+	projectID := config.ProjectID
+	credentialsPath := config.CredentialsPath
 	var app *firebase.App
 	var err error
 

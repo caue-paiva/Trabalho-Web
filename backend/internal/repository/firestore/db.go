@@ -17,22 +17,17 @@ import (
 // Compile-time check that DBRepository implements server.DBPort
 var _ server.DBPort = (*DBRepository)(nil)
 
-// Collection names
-const (
-	textsCollection          = "texts"
-	imagesCollection         = "images"
-	timelineEntriesCollection = "timeline_entries"
-)
-
 // DBRepository implements server.DBPort using Firestore
 type DBRepository struct {
-	client *firestore.Client
+	client      *firestore.Client
+	collections CollectionNames
 }
 
 // NewDBRepository creates a new Firestore DB repository
-func NewDBRepository(client *firestore.Client) *DBRepository {
+func NewDBRepository(client *firestore.Client, collections CollectionNames) *DBRepository {
 	return &DBRepository{
-		client: client,
+		client:      client,
+		collections: collections,
 	}
 }
 
@@ -41,7 +36,7 @@ func NewDBRepository(client *firestore.Client) *DBRepository {
 // =======================
 
 func (r *DBRepository) GetTextBySlug(ctx context.Context, slug string) (entities.Text, error) {
-	iter := r.client.Collection(textsCollection).Where("slug", "==", slug).Limit(1).Documents(ctx)
+	iter := r.client.Collection(r.collections.Texts).Where("slug", "==", slug).Limit(1).Documents(ctx)
 	doc, err := iter.Next()
 	if err == iterator.Done {
 		return entities.Text{}, fmt.Errorf("text with slug %s not found", slug)
@@ -59,7 +54,7 @@ func (r *DBRepository) GetTextBySlug(ctx context.Context, slug string) (entities
 }
 
 func (r *DBRepository) GetTextByID(ctx context.Context, id string) (entities.Text, error) {
-	doc, err := r.client.Collection(textsCollection).Doc(id).Get(ctx)
+	doc, err := r.client.Collection(r.collections.Texts).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return entities.Text{}, fmt.Errorf("text with id %s not found", id)
@@ -76,23 +71,23 @@ func (r *DBRepository) GetTextByID(ctx context.Context, id string) (entities.Tex
 }
 
 func (r *DBRepository) GetTextsByPageID(ctx context.Context, pageID string) ([]entities.Text, error) {
-	iter := r.client.Collection(textsCollection).Where("pageID", "==", pageID).Documents(ctx)
+	iter := r.client.Collection(r.collections.Texts).Where("pageID", "==", pageID).Documents(ctx)
 	return r.textsFromIterator(iter)
 }
 
 func (r *DBRepository) ListTextsByPageSlug(ctx context.Context, pageSlug string) ([]entities.Text, error) {
-	iter := r.client.Collection(textsCollection).Where("pageSlug", "==", pageSlug).Documents(ctx)
+	iter := r.client.Collection(r.collections.Texts).Where("pageSlug", "==", pageSlug).Documents(ctx)
 	return r.textsFromIterator(iter)
 }
 
 func (r *DBRepository) ListAllTexts(ctx context.Context) ([]entities.Text, error) {
-	iter := r.client.Collection(textsCollection).Documents(ctx)
+	iter := r.client.Collection(r.collections.Texts).Documents(ctx)
 	return r.textsFromIterator(iter)
 }
 
 func (r *DBRepository) CreateText(ctx context.Context, text entities.Text) (entities.Text, error) {
 	// Generate new document reference
-	docRef := r.client.Collection(textsCollection).NewDoc()
+	docRef := r.client.Collection(r.collections.Texts).NewDoc()
 	text.ID = docRef.ID
 
 	// Set timestamps if not already set
@@ -112,7 +107,7 @@ func (r *DBRepository) CreateText(ctx context.Context, text entities.Text) (enti
 }
 
 func (r *DBRepository) UpdateText(ctx context.Context, id string, patch entities.Text) (entities.Text, error) {
-	docRef := r.client.Collection(textsCollection).Doc(id)
+	docRef := r.client.Collection(r.collections.Texts).Doc(id)
 
 	// Update timestamp
 	patch.UpdatedAt = time.Now()
@@ -149,7 +144,7 @@ func (r *DBRepository) UpdateText(ctx context.Context, id string, patch entities
 }
 
 func (r *DBRepository) DeleteText(ctx context.Context, id string) error {
-	if _, err := r.client.Collection(textsCollection).Doc(id).Delete(ctx); err != nil {
+	if _, err := r.client.Collection(r.collections.Texts).Doc(id).Delete(ctx); err != nil {
 		return fmt.Errorf("error deleting text: %w", err)
 	}
 	return nil
@@ -160,7 +155,7 @@ func (r *DBRepository) DeleteText(ctx context.Context, id string) error {
 // =======================
 
 func (r *DBRepository) GetImageByID(ctx context.Context, id string) (entities.Image, error) {
-	doc, err := r.client.Collection(imagesCollection).Doc(id).Get(ctx)
+	doc, err := r.client.Collection(r.collections.Images).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return entities.Image{}, fmt.Errorf("image with id %s not found", id)
@@ -177,13 +172,13 @@ func (r *DBRepository) GetImageByID(ctx context.Context, id string) (entities.Im
 }
 
 func (r *DBRepository) GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error) {
-	iter := r.client.Collection(imagesCollection).Where("slug", "==", slug).Documents(ctx)
+	iter := r.client.Collection(r.collections.Images).Where("slug", "==", slug).Documents(ctx)
 	return r.imagesFromIterator(iter)
 }
 
 func (r *DBRepository) CreateImageMeta(ctx context.Context, img entities.Image) (entities.Image, error) {
 	// Generate new document reference
-	docRef := r.client.Collection(imagesCollection).NewDoc()
+	docRef := r.client.Collection(r.collections.Images).NewDoc()
 	img.ID = docRef.ID
 
 	// Set timestamps if not already set
@@ -203,7 +198,7 @@ func (r *DBRepository) CreateImageMeta(ctx context.Context, img entities.Image) 
 }
 
 func (r *DBRepository) UpdateImageMeta(ctx context.Context, id string, patch entities.Image) (entities.Image, error) {
-	docRef := r.client.Collection(imagesCollection).Doc(id)
+	docRef := r.client.Collection(r.collections.Images).Doc(id)
 
 	// Update timestamp
 	patch.UpdatedAt = time.Now()
@@ -246,7 +241,7 @@ func (r *DBRepository) UpdateImageMeta(ctx context.Context, id string, patch ent
 }
 
 func (r *DBRepository) DeleteImageMeta(ctx context.Context, id string) error {
-	if _, err := r.client.Collection(imagesCollection).Doc(id).Delete(ctx); err != nil {
+	if _, err := r.client.Collection(r.collections.Images).Doc(id).Delete(ctx); err != nil {
 		return fmt.Errorf("error deleting image: %w", err)
 	}
 	return nil
@@ -257,7 +252,7 @@ func (r *DBRepository) DeleteImageMeta(ctx context.Context, id string) error {
 // =======================
 
 func (r *DBRepository) GetTimelineEntryByID(ctx context.Context, id string) (entities.TimelineEntry, error) {
-	doc, err := r.client.Collection(timelineEntriesCollection).Doc(id).Get(ctx)
+	doc, err := r.client.Collection(r.collections.TimelineEntries).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
 			return entities.TimelineEntry{}, fmt.Errorf("timeline entry with id %s not found", id)
@@ -274,13 +269,13 @@ func (r *DBRepository) GetTimelineEntryByID(ctx context.Context, id string) (ent
 }
 
 func (r *DBRepository) ListTimelineEntries(ctx context.Context) ([]entities.TimelineEntry, error) {
-	iter := r.client.Collection(timelineEntriesCollection).OrderBy("date", firestore.Asc).Documents(ctx)
+	iter := r.client.Collection(r.collections.TimelineEntries).OrderBy("date", firestore.Asc).Documents(ctx)
 	return r.timelineEntriesFromIterator(iter)
 }
 
 func (r *DBRepository) CreateTimelineEntry(ctx context.Context, entry entities.TimelineEntry) (entities.TimelineEntry, error) {
 	// Generate new document reference
-	docRef := r.client.Collection(timelineEntriesCollection).NewDoc()
+	docRef := r.client.Collection(r.collections.TimelineEntries).NewDoc()
 	entry.ID = docRef.ID
 
 	// Set timestamps if not already set
@@ -300,7 +295,7 @@ func (r *DBRepository) CreateTimelineEntry(ctx context.Context, entry entities.T
 }
 
 func (r *DBRepository) UpdateTimelineEntry(ctx context.Context, id string, patch entities.TimelineEntry) (entities.TimelineEntry, error) {
-	docRef := r.client.Collection(timelineEntriesCollection).Doc(id)
+	docRef := r.client.Collection(r.collections.TimelineEntries).Doc(id)
 
 	// Update timestamp
 	patch.UpdatedAt = time.Now()
@@ -337,7 +332,7 @@ func (r *DBRepository) UpdateTimelineEntry(ctx context.Context, id string, patch
 }
 
 func (r *DBRepository) DeleteTimelineEntry(ctx context.Context, id string) error {
-	if _, err := r.client.Collection(timelineEntriesCollection).Doc(id).Delete(ctx); err != nil {
+	if _, err := r.client.Collection(r.collections.TimelineEntries).Doc(id).Delete(ctx); err != nil {
 		return fmt.Errorf("error deleting timeline entry: %w", err)
 	}
 	return nil
