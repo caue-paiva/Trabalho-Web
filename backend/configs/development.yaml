@@ -3,7 +3,7 @@
 # Firebase configuration
 firebase:
   project_id: sitegrupysanca
-  credentials_path: configs/sitegrupysanca-firebase-adminsdk-fbsvc-ff7567bd6e.json
+  credentials_path: sitegrupysanca-firebase-adminsdk-fbsvc-ff7567bd6e.json
 
 # Firebase collection paths/names
 collections:
