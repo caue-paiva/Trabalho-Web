@@ -39,12 +39,7 @@ func main() {
 	var objectStore server.ObjectStorePort = nil // TODO: Wire up object store later
 
 	// Unmarshal Firebase config
-	type FirebaseConfig struct {
-		ProjectID       string `yaml:"project_id"`
-		CredentialsPath string `yaml:"credentials_path"`
-	}
-
-	var fbConfig FirebaseConfig
+	var fbConfig firestoreRepo.FirebaseConfig
 	if err := config.UnmarshalKey("firebase", &fbConfig); err != nil {
 		log.Printf("Warning: Failed to load Firebase config: %v", err)
 		log.Println("Continuing without database (only /events endpoint will work)")
@@ -57,13 +52,7 @@ func main() {
 		}
 
 		// Unmarshal collection names
-		type Collections struct {
-			Texts     string `yaml:"texts"`
-			Images    string `yaml:"images"`
-			Timelines string `yaml:"timelines"`
-		}
-
-		var cols Collections
+		var cols firestoreRepo.Collections
 		if err := config.UnmarshalKey("collections", &cols); err != nil {
 			log.Fatalf("Failed to load collection names: %v", err)
 		}
