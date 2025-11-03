@@ -36,7 +36,10 @@ func main() {
 
 	// Initialize database using the config provider pattern
 	var db server.DBPort
-	var objectStore server.ObjectStorePort = nil // TODO: Wire up object store later
+
+	// Initialize mock object store (replace with real implementation later)
+	objectStore := clients.NewMockObjectStore()
+	log.Println("Using mock object store (no actual file storage)")
 
 	// Create DB repository using the config provider
 	log.Println("Initializing Firestore...")
