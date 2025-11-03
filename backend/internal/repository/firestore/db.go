@@ -31,6 +31,11 @@ func NewDBRepository(client *firestore.Client, collections CollectionNames) *DBR
 	}
 }
 
+// Close closes the underlying Firestore client
+func (r *DBRepository) Close() error {
+	return r.client.Close()
+}
+
 // =======================
 // TEXT OPERATIONS
 // =======================

@@ -9,6 +9,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// FirebaseConfig holds Firebase-specific configuration loaded from YAML
+type FirebaseConfig struct {
+	ProjectID       string `yaml:"project_id"`
+	CredentialsPath string `yaml:"credentials_path"`
+}
+
+// Collections holds the names of Firestore collections loaded from YAML
+type Collections struct {
+	Texts     string `yaml:"texts"`
+	Images    string `yaml:"images"`
+	Timelines string `yaml:"timelines"`
+}
+
 // ConfigClient provides access to configuration values
 type ConfigClient interface {
 	// GetConfig returns a config value by key (supports nested keys with dots, e.g., "collections.texts")
@@ -21,6 +34,12 @@ type ConfigClient interface {
 	// GetCredentialsJSON reads the Firebase credentials JSON file and returns its bytes
 	// It looks for the file in the configs directory first, then in the project root
 	GetCredentialsJSON(filename string) ([]byte, error)
+
+	// GetFirebaseConfig returns the Firebase configuration
+	GetFirebaseConfig() (FirebaseConfig, error)
+
+	// GetCollections returns the Firestore collection names
+	GetCollections() (Collections, error)
 }
 
 type configService struct {
@@ -208,4 +227,22 @@ func findProjectRoot() (string, error) {
 		}
 		dir = parent
 	}
+}
+
+// GetFirebaseConfig returns the Firebase configuration
+func (s *configService) GetFirebaseConfig() (FirebaseConfig, error) {
+	var config FirebaseConfig
+	if err := s.UnmarshalKey("firebase", &config); err != nil {
+		return FirebaseConfig{}, err
+	}
+	return config, nil
+}
+
+// GetCollections returns the Firestore collection names
+func (s *configService) GetCollections() (Collections, error) {
+	var collections Collections
+	if err := s.UnmarshalKey("collections", &collections); err != nil {
+		return Collections{}, err
+	}
+	return collections, nil
 }

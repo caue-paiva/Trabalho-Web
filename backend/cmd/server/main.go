@@ -34,56 +34,28 @@ func main() {
 	// Initialize dependencies
 	eventsClient := clients.NewEventsClient()
 
-	// Load Firebase configuration from config file
+	// Initialize database using the config provider pattern
 	var db server.DBPort
 	var objectStore server.ObjectStorePort = nil // TODO: Wire up object store later
 
-	// Unmarshal Firebase config
-	var fbConfig firestoreRepo.FirebaseConfig
-	if err := config.UnmarshalKey("firebase", &fbConfig); err != nil {
-		log.Printf("Warning: Failed to load Firebase config: %v", err)
+	// Create DB repository using the config provider
+	log.Println("Initializing Firestore...")
+	dbRepo, err := firestoreRepo.NewDBRepositoryWithProvider(ctx, config)
+	if err != nil {
+		log.Printf("Warning: Failed to initialize Firestore: %v", err)
 		log.Println("Continuing without database (only /events endpoint will work)")
 		db = nil
 	} else {
-		// Read credentials JSON file
-		credentialsJSON, err := config.GetCredentialsJSON(fbConfig.CredentialsPath)
-		if err != nil {
-			log.Fatalf("Failed to read credentials file: %v", err)
-		}
+		db = dbRepo
+		defer dbRepo.Close()
 
-		// Unmarshal collection names
-		var cols firestoreRepo.Collections
-		if err := config.UnmarshalKey("collections", &cols); err != nil {
-			log.Fatalf("Failed to load collection names: %v", err)
-		}
-
-		// Create Firestore collection names
-		collections := firestoreRepo.CollectionNames{
-			Texts:           cols.Texts,
-			Images:          cols.Images,
-			TimelineEntries: cols.Timelines,
-		}
-
-		// Configure Firestore client
-		firestoreConfig := firestoreRepo.FirestoreConfig{
-			ProjectID:       fbConfig.ProjectID,
-			CredentialsJSON: credentialsJSON,
-			Collections:     collections,
-		}
-
-		// Initialize Firestore client
-		log.Printf("Initializing Firestore (project: %s)...", fbConfig.ProjectID)
-		firestoreClient, err := firestoreRepo.NewFirestoreClient(ctx, firestoreConfig)
-		if err != nil {
-			log.Fatalf("Failed to create Firestore client: %v", err)
-		}
-		defer firestoreClient.Close()
-
-		// Create DB repository
-		db = firestoreRepo.NewDBRepository(firestoreClient, collections)
+		// Log successful initialization
+		fbConfig, _ := config.GetFirebaseConfig()
+		collections, _ := config.GetCollections()
 		log.Printf("Firestore initialized successfully")
+		log.Printf("  Project: %s", fbConfig.ProjectID)
 		log.Printf("  Collections: texts=%s, images=%s, timelines=%s",
-			collections.Texts, collections.Images, collections.TimelineEntries)
+			collections.Texts, collections.Images, collections.Timelines)
 	}
 
 	// Create unified server
