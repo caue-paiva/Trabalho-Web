@@ -1,1 +1,12 @@
-# production config
+# Production config
+
+# Firebase configuration
+firebase:
+  project_id: sitegrupysanca
+  credentials_path: /secrets/firebase-credentials.json
+
+# Firebase collection paths/names
+collections:
+  texts: texts
+  timelines: timeline_entries
+  images: images

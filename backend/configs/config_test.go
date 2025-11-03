@@ -29,17 +29,17 @@ func TestNewConfigService_Production(t *testing.T) {
 	require.NotNil(t, config)
 }
 
-// TestGetConfig_SimpleKey tests getting a simple top-level config value
+// TestGetConfig_SimpleKey tests getting a simple nested config value
 func TestGetConfig_SimpleKey(t *testing.T) {
 	os.Unsetenv("RUNTIME_ENV") // Use development config
 
 	config, err := NewConfigService()
 	require.NoError(t, err)
 
-	// Get firebase_config_path from development.yaml
-	value, err := config.GetConfig("firebase_config_path")
+	// Get firebase.project_id from development.yaml
+	value, err := config.GetConfig("firebase.project_id")
 	require.NoError(t, err)
-	assert.Equal(t, "sitegrupysanca-firebase-adminsdk-fbsvc-ff7567bd6e.json", value)
+	assert.Equal(t, "sitegrupysanca", value)
 }
 
 // TestGetConfig_NestedKey tests getting nested config values with dot notation
