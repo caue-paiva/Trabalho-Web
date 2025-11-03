@@ -19,21 +19,21 @@ type CollectionNames struct {
 // FirestoreConfig holds configuration for Firestore client initialization
 type FirestoreConfig struct {
 	ProjectID       string
-	CredentialsPath string
+	CredentialsJSON []byte
 	Collections     CollectionNames
 }
 
 // NewFirestoreClient creates a new Firestore client
-// credentialsPath should point to your Firebase service account JSON key file
+// config.CredentialsJSON should contain the Firebase service account JSON key bytes
 func NewFirestoreClient(ctx context.Context, config FirestoreConfig) (*firestore.Client, error) {
 	projectID := config.ProjectID
-	credentialsPath := config.CredentialsPath
+	credentialsJSON := config.CredentialsJSON
 	var app *firebase.App
 	var err error
 
-	if credentialsPath != "" {
-		// Initialize with service account credentials
-		opt := option.WithCredentialsFile(credentialsPath)
+	if len(credentialsJSON) > 0 {
+		// Initialize with service account credentials JSON
+		opt := option.WithCredentialsJSON(credentialsJSON)
 		conf := &firebase.Config{ProjectID: projectID}
 		app, err = firebase.NewApp(ctx, conf, opt)
 	} else {

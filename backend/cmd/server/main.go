@@ -50,6 +50,12 @@ func main() {
 		log.Println("Continuing without database (only /events endpoint will work)")
 		db = nil
 	} else {
+		// Read credentials JSON file
+		credentialsJSON, err := config.GetCredentialsJSON(fbConfig.CredentialsPath)
+		if err != nil {
+			log.Fatalf("Failed to read credentials file: %v", err)
+		}
+
 		// Unmarshal collection names
 		type Collections struct {
 			Texts     string `yaml:"texts"`
@@ -72,7 +78,7 @@ func main() {
 		// Configure Firestore client
 		firestoreConfig := firestoreRepo.FirestoreConfig{
 			ProjectID:       fbConfig.ProjectID,
-			CredentialsPath: fbConfig.CredentialsPath,
+			CredentialsJSON: credentialsJSON,
 			Collections:     collections,
 		}
 

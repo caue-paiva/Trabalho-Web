@@ -17,6 +17,10 @@ type ConfigClient interface {
 	// UnmarshalKey unmarshals a config section into a struct pointer using yaml tags
 	// Example: UnmarshalKey("collections", &collectionsStruct)
 	UnmarshalKey(key string, target any) error
+
+	// GetCredentialsJSON reads the Firebase credentials JSON file and returns its bytes
+	// It looks for the file in the configs directory first, then in the project root
+	GetCredentialsJSON(filename string) ([]byte, error)
 }
 
 type configService struct {
@@ -43,9 +47,11 @@ func NewConfigService() (ConfigClient, error) {
 
 	// Try multiple locations (for different working directories)
 	possiblePaths := []string{
-		filepath.Join("configs", configFile),  // From project root
-		configFile,                            // From configs directory (for tests)
-		filepath.Join("..", "configs", configFile), // One level up
+		filepath.Join("configs", configFile),             // From project root
+		configFile,                                       // From configs directory
+		filepath.Join("..", "configs", configFile),       // One level up
+		filepath.Join("../..", "configs", configFile),    // Two levels up
+		filepath.Join("../../..", "configs", configFile), // Three levels up (for deep tests like firestore)
 	}
 
 	var data []byte
@@ -111,12 +117,13 @@ func (s *configService) GetConfig(cfgName string) (any, error) {
 // The target must be a pointer to a struct with yaml tags
 //
 // Example:
-//   type Collections struct {
-//       Texts string `yaml:"texts"`
-//       Images string `yaml:"images"`
-//   }
-//   var cols Collections
-//   err := config.UnmarshalKey("collections", &cols)
+//
+//	type Collections struct {
+//	    Texts string `yaml:"texts"`
+//	    Images string `yaml:"images"`
+//	}
+//	var cols Collections
+//	err := config.UnmarshalKey("collections", &cols)
 func (s *configService) UnmarshalKey(key string, target any) error {
 	if target == nil {
 		return fmt.Errorf("target cannot be nil")
@@ -140,4 +147,65 @@ func (s *configService) UnmarshalKey(key string, target any) error {
 	}
 
 	return nil
+}
+
+// GetCredentialsJSON reads the Firebase credentials JSON file and returns its bytes
+// It looks for the file in the configs directory first, then in the project root
+func (s *configService) GetCredentialsJSON(filename string) ([]byte, error) {
+	if filename == "" {
+		return nil, fmt.Errorf("filename cannot be empty")
+	}
+
+	// If it's an absolute path, read it directly
+	if filepath.IsAbs(filename) {
+		data, err := os.ReadFile(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read credentials file %s: %w", filename, err)
+		}
+		return data, nil
+	}
+
+	// Find project root by walking up to find go.mod
+	projectRoot, err := findProjectRoot()
+	if err != nil {
+		return nil, fmt.Errorf("failed to find project root: %w", err)
+	}
+
+	// Try configs directory first, then project root
+	possiblePaths := []string{
+		filepath.Join(projectRoot, "configs", filename),
+		filepath.Join(projectRoot, filename),
+	}
+
+	for _, path := range possiblePaths {
+		data, err := os.ReadFile(path)
+		if err == nil {
+			return data, nil
+		}
+	}
+
+	return nil, fmt.Errorf("credentials file %s not found in configs directory or project root", filename)
+}
+
+// findProjectRoot walks up the directory tree to find go.mod
+func findProjectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		// Check if go.mod exists in current directory
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+
+		// Move up one directory
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Reached filesystem root without finding go.mod
+			return "", fmt.Errorf("could not find project root (go.mod not found)")
+		}
+		dir = parent
+	}
 }
