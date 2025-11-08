@@ -1,6 +1,7 @@
 package integration_tests
 
 import (
+	"backend/internal/http/mapper"
 	"net/http"
 	"testing"
 
@@ -8,37 +9,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TextResponse represents the API response for a text entity
-type TextResponse struct {
-	ID            string `json:"id"`
-	Slug          string `json:"slug"`
-	Content       string `json:"content"`
-	PageID        string `json:"pageId,omitempty"`
-	PageSlug      string `json:"pageSlug,omitempty"`
-	CreatedAt     string `json:"createdAt"`
-	UpdatedAt     string `json:"updatedAt"`
-	LastUpdatedBy string `json:"lastUpdatedBy,omitempty"`
-}
-
-// CreateTextRequest represents the request body for creating a text
-type CreateTextRequest struct {
-	Slug     string `json:"slug"`
-	Content  string `json:"content"`
-	PageSlug string `json:"pageSlug,omitempty"`
-}
-
-// UpdateTextRequest represents the request body for updating a text
-type UpdateTextRequest struct {
-	Content       string `json:"content,omitempty"`
-	PageSlug      string `json:"pageSlug,omitempty"`
-	LastUpdatedBy string `json:"lastUpdatedBy,omitempty"`
-}
-
 func TestTexts_CreateAndGet(t *testing.T) {
 	slug := GenerateUniqueSlug("integration-test")
 
 	// Create a text
-	createReq := CreateTextRequest{
+	createReq := mapper.CreateTextRequest{
 		Slug:     slug,
 		Content:  "This is an integration test content",
 		PageSlug: "test-page",
@@ -47,8 +22,10 @@ func TestTexts_CreateAndGet(t *testing.T) {
 	resp := MakeRequest(t, "POST", "/texts", createReq)
 	AssertStatusCode(t, resp, http.StatusCreated)
 
-	var created TextResponse
+	var created mapper.TextResponse
 	ParseJSONResponse(t, resp, &created)
+
+	t.Log(created)
 
 	// Validate created text
 	assert.NotEmpty(t, created.ID, "Text should have an ID")
@@ -68,7 +45,7 @@ func TestTexts_CreateAndGet(t *testing.T) {
 	resp = MakeRequest(t, "GET", "/texts/"+slug, nil)
 	AssertStatusCode(t, resp, http.StatusOK)
 
-	var retrieved TextResponse
+	var retrieved mapper.TextResponse
 	ParseJSONResponse(t, resp, &retrieved)
 
 	assert.Equal(t, created.ID, retrieved.ID)
@@ -79,7 +56,7 @@ func TestTexts_CreateAndGet(t *testing.T) {
 	resp = MakeRequest(t, "GET", "/texts/id/"+created.ID, nil)
 	AssertStatusCode(t, resp, http.StatusOK)
 
-	var retrievedByID TextResponse
+	var retrievedByID mapper.TextResponse
 	ParseJSONResponse(t, resp, &retrievedByID)
 
 	assert.Equal(t, created.ID, retrievedByID.ID)
@@ -90,7 +67,7 @@ func TestTexts_Update(t *testing.T) {
 	slug := GenerateUniqueSlug("update-test")
 
 	// Create a text
-	createReq := CreateTextRequest{
+	createReq := mapper.CreateTextRequest{
 		Slug:     slug,
 		Content:  "Original content",
 		PageSlug: "original-page",
@@ -99,7 +76,7 @@ func TestTexts_Update(t *testing.T) {
 	resp := MakeRequest(t, "POST", "/texts", createReq)
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	var created TextResponse
+	var created mapper.TextResponse
 	ParseJSONResponse(t, resp, &created)
 
 	// Cleanup
@@ -109,29 +86,27 @@ func TestTexts_Update(t *testing.T) {
 	}()
 
 	// Update the text
-	updateReq := UpdateTextRequest{
-		Content:       "Updated content",
-		PageSlug:      "updated-page",
-		LastUpdatedBy: "integration-test",
+	updateReq := mapper.UpdateTextRequest{
+		Content:  "Updated content",
+		PageSlug: "updated-page",
 	}
 
 	resp = MakeRequest(t, "PUT", "/texts/"+created.ID, updateReq)
 	AssertStatusCode(t, resp, http.StatusOK)
 
-	var updated TextResponse
+	var updated mapper.TextResponse
 	ParseJSONResponse(t, resp, &updated)
 
 	assert.Equal(t, created.ID, updated.ID)
 	assert.Equal(t, "Updated content", updated.Content)
 	assert.Equal(t, "updated-page", updated.PageSlug)
-	assert.Equal(t, "integration-test", updated.LastUpdatedBy)
 }
 
 func TestTexts_Delete(t *testing.T) {
 	slug := GenerateUniqueSlug("delete-test")
 
 	// Create a text
-	createReq := CreateTextRequest{
+	createReq := mapper.CreateTextRequest{
 		Slug:    slug,
 		Content: "This will be deleted",
 	}
@@ -139,7 +114,7 @@ func TestTexts_Delete(t *testing.T) {
 	resp := MakeRequest(t, "POST", "/texts", createReq)
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 
-	var created TextResponse
+	var created mapper.TextResponse
 	ParseJSONResponse(t, resp, &created)
 
 	// Delete the text
@@ -155,7 +130,7 @@ func TestTexts_Delete(t *testing.T) {
 
 func TestTexts_List(t *testing.T) {
 	// Create multiple texts
-	texts := []CreateTextRequest{
+	texts := []mapper.CreateTextRequest{
 		{Slug: GenerateUniqueSlug("list-test-1"), Content: "Content 1", PageSlug: "test-page"},
 		{Slug: GenerateUniqueSlug("list-test-2"), Content: "Content 2", PageSlug: "test-page"},
 	}
@@ -165,7 +140,7 @@ func TestTexts_List(t *testing.T) {
 		resp := MakeRequest(t, "POST", "/texts", text)
 		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
-		var created TextResponse
+		var created mapper.TextResponse
 		ParseJSONResponse(t, resp, &created)
 		createdIDs = append(createdIDs, created.ID)
 	}
@@ -182,7 +157,7 @@ func TestTexts_List(t *testing.T) {
 	resp := MakeRequest(t, "GET", "/texts", nil)
 	AssertStatusCode(t, resp, http.StatusOK)
 
-	var allTexts []TextResponse
+	var allTexts []mapper.TextResponse
 	ParseJSONResponse(t, resp, &allTexts)
 
 	assert.GreaterOrEqual(t, len(allTexts), 2, "Should have at least our 2 created texts")
@@ -192,7 +167,7 @@ func TestTexts_GetByPageSlug(t *testing.T) {
 	pageSlug := GenerateUniqueSlug("test-page")
 
 	// Create texts with the same page slug
-	texts := []CreateTextRequest{
+	texts := []mapper.CreateTextRequest{
 		{Slug: GenerateUniqueSlug("page-test-1"), Content: "Content 1", PageSlug: pageSlug},
 		{Slug: GenerateUniqueSlug("page-test-2"), Content: "Content 2", PageSlug: pageSlug},
 	}
@@ -202,7 +177,7 @@ func TestTexts_GetByPageSlug(t *testing.T) {
 		resp := MakeRequest(t, "POST", "/texts", text)
 		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
-		var created TextResponse
+		var created mapper.TextResponse
 		ParseJSONResponse(t, resp, &created)
 		createdIDs = append(createdIDs, created.ID)
 	}
@@ -219,7 +194,7 @@ func TestTexts_GetByPageSlug(t *testing.T) {
 	resp := MakeRequest(t, "GET", "/texts/page/slug/"+pageSlug, nil)
 	AssertStatusCode(t, resp, http.StatusOK)
 
-	var pageTexts []TextResponse
+	var pageTexts []mapper.TextResponse
 	ParseJSONResponse(t, resp, &pageTexts)
 
 	assert.GreaterOrEqual(t, len(pageTexts), 2, "Should have at least our 2 texts for this page")
@@ -244,7 +219,7 @@ func TestTexts_NotFound(t *testing.T) {
 	resp.Body.Close()
 
 	// Try to update non-existent text
-	updateReq := UpdateTextRequest{Content: "Updated"}
+	updateReq := mapper.UpdateTextRequest{Content: "Updated"}
 	resp = MakeRequest(t, "PUT", "/texts/non-existent-id-12345", updateReq)
 	AssertStatusCode(t, resp, http.StatusNotFound)
 	resp.Body.Close()
