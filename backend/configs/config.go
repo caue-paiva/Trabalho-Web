@@ -26,9 +26,11 @@ type Collections struct {
 type GCSConfig struct {
 	BucketName             string `yaml:"bucket_name"`
 	CredentialsPath        string `yaml:"credentials_path"`
+	CredentialsJSON        []byte `yaml:"-"` // Populated by GetCredentialsJSON, not from YAML
 	ProjectID              string `yaml:"project_id"`
 	MakePublic             bool   `yaml:"make_public"`
 	SignedURLExpiryMinutes int    `yaml:"signed_url_expiry_minutes"`
+	BasePath               string `yaml:"base_path"` // Base path within bucket for all objects (e.g., "images", "media/uploads")
 }
 
 // ConfigClient provides access to configuration values
@@ -260,10 +262,21 @@ func (s *configService) GetCollections() (Collections, error) {
 }
 
 // GetGCSConfig returns the Google Cloud Storage configuration
+// If CredentialsPath is specified, it will also populate CredentialsJSON with the file contents
 func (s *configService) GetGCSConfig() (GCSConfig, error) {
 	var config GCSConfig
 	if err := s.UnmarshalKey("gcs", &config); err != nil {
 		return GCSConfig{}, err
 	}
+
+	// If credentials path is specified, read the credentials file
+	if config.CredentialsPath != "" {
+		credentialsJSON, err := s.GetCredentialsJSON(config.CredentialsPath)
+		if err != nil {
+			return GCSConfig{}, fmt.Errorf("failed to read credentials file: %w", err)
+		}
+		config.CredentialsJSON = credentialsJSON
+	}
+
 	return config, nil
 }

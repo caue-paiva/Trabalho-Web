@@ -2,8 +2,10 @@ package gcs
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -25,6 +27,7 @@ type GCSGateway struct {
 	bucketName             string
 	makePublic             bool
 	signedURLExpiryMinutes int
+	basePath               string // Base path prefix for all objects (e.g., "images", "media/uploads")
 }
 
 // NewGCSGateway creates a new GCS gateway with the given configuration
@@ -41,11 +44,11 @@ func NewGCSGateway(ctx context.Context, config configs.GCSConfig) (*GCSGateway, 
 	var client *storage.Client
 	var err error
 
-	if config.CredentialsPath != "" {
-		// Use service account credentials from file
-		client, err = storage.NewClient(ctx, option.WithCredentialsFile(config.CredentialsPath))
+	if len(config.CredentialsJSON) > 0 {
+		// Use service account credentials from JSON bytes (preferred)
+		client, err = storage.NewClient(ctx, option.WithCredentialsJSON(config.CredentialsJSON))
 		if err != nil {
-			return nil, fmt.Errorf("failed to create GCS client with credentials file: %w", err)
+			return nil, fmt.Errorf("failed to create GCS client with credentials JSON: %w", err)
 		}
 	} else {
 		// Use application default credentials (for Cloud Run, GCE, or gcloud auth)
@@ -71,12 +74,16 @@ func NewGCSGateway(ctx context.Context, config configs.GCSConfig) (*GCSGateway, 
 		expiryMinutes = _defaultExpiryInMinutes
 	}
 
+	// Clean up base path (remove leading/trailing slashes)
+	basePath := strings.Trim(config.BasePath, "/")
+
 	return &GCSGateway{
 		client:                 client,
 		bucket:                 bucket,
 		bucketName:             config.BucketName,
 		makePublic:             config.MakePublic,
 		signedURLExpiryMinutes: expiryMinutes,
+		basePath:               basePath,
 	}, nil
 }
 
@@ -92,8 +99,11 @@ func NewGCSGatewayWithProvider(ctx context.Context, provider configs.ConfigClien
 
 // PutObject uploads a file to GCS and returns its public URL
 func (g *GCSGateway) PutObject(ctx context.Context, key string, data []byte) (string, error) {
+	// Prepend base path if configured
+	fullKey := g.buildFullKey(key)
+
 	// Create object writer
-	obj := g.bucket.Object(key)
+	obj := g.bucket.Object(fullKey)
 	writer := obj.NewWriter(ctx)
 
 	// Set content type based on file extension
@@ -118,20 +128,22 @@ func (g *GCSGateway) PutObject(ctx context.Context, key string, data []byte) (st
 		return "", fmt.Errorf("failed to close object writer: %w", err)
 	}
 
-	// Return public URL
-	publicURL := g.getPublicURL(key)
+	// Return public URL with full key
+	publicURL := g.getPublicURL(fullKey)
 	return publicURL, nil
 }
 
 // DeleteObject deletes an object from GCS
 // Returns nil if object doesn't exist (idempotent operation)
 func (g *GCSGateway) DeleteObject(ctx context.Context, key string) error {
-	obj := g.bucket.Object(key)
+	// Prepend base path if configured
+	fullKey := g.buildFullKey(key)
+	obj := g.bucket.Object(fullKey)
 
 	// Delete the object
 	if err := obj.Delete(ctx); err != nil {
-		// Check if error is because object doesn't exist
-		if err == storage.ErrObjectNotExist {
+		// Check if error is because object doesn't exist (idempotent operation)
+		if errors.Is(err, storage.ErrObjectNotExist) {
 			// Idempotent - return success if object doesn't exist
 			return nil
 		}
@@ -143,6 +155,9 @@ func (g *GCSGateway) DeleteObject(ctx context.Context, key string) error {
 
 // SignedURL generates a temporary signed URL for private object access
 func (g *GCSGateway) SignedURL(ctx context.Context, key string) (string, error) {
+	// Prepend base path if configured
+	fullKey := g.buildFullKey(key)
+
 	// Calculate expiry time
 	expires := time.Now().Add(time.Duration(g.signedURLExpiryMinutes) * time.Minute)
 
@@ -152,12 +167,22 @@ func (g *GCSGateway) SignedURL(ctx context.Context, key string) (string, error) 
 		Expires: expires,
 	}
 
-	url, err := g.bucket.SignedURL(key, opts)
+	url, err := g.bucket.SignedURL(fullKey, opts)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate signed URL: %w", err)
 	}
 
 	return url, nil
+}
+
+// buildFullKey constructs the full object key by prepending the base path
+func (g *GCSGateway) buildFullKey(key string) string {
+	if g.basePath == "" {
+		return key
+	}
+	// Remove leading slash from key if present
+	key = strings.TrimPrefix(key, "/")
+	return fmt.Sprintf("%s/%s", g.basePath, key)
 }
 
 // getPublicURL constructs the public URL for an object

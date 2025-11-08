@@ -13,8 +13,9 @@ collections:
 
 # Google Cloud Storage configuration
 gcs:
-  bucket_name: sitegrupysanca.appspot.com
+  bucket_name: sitegrupysanca.firebasestorage.app
   credentials_path: sitegrupysanca-firebase-adminsdk-fbsvc-ff7567bd6e.json
   project_id: sitegrupysanca
   make_public: true
   signed_url_expiry_minutes: 15
+  base_path: test/images  # Base path within bucket (e.g., "images" results in "images/photo.jpg")
