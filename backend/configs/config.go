@@ -22,6 +22,15 @@ type Collections struct {
 	Timelines string `yaml:"timelines"`
 }
 
+// GCSConfig holds Google Cloud Storage configuration
+type GCSConfig struct {
+	BucketName             string `yaml:"bucket_name"`
+	CredentialsPath        string `yaml:"credentials_path"`
+	ProjectID              string `yaml:"project_id"`
+	MakePublic             bool   `yaml:"make_public"`
+	SignedURLExpiryMinutes int    `yaml:"signed_url_expiry_minutes"`
+}
+
 // ConfigClient provides access to configuration values
 type ConfigClient interface {
 	// GetConfig returns a config value by key (supports nested keys with dots, e.g., "collections.texts")
@@ -40,6 +49,9 @@ type ConfigClient interface {
 
 	// GetCollections returns the Firestore collection names
 	GetCollections() (Collections, error)
+
+	// GetGCSConfig returns the Google Cloud Storage configuration
+	GetGCSConfig() (GCSConfig, error)
 }
 
 type configService struct {
@@ -245,4 +257,13 @@ func (s *configService) GetCollections() (Collections, error) {
 		return Collections{}, err
 	}
 	return collections, nil
+}
+
+// GetGCSConfig returns the Google Cloud Storage configuration
+func (s *configService) GetGCSConfig() (GCSConfig, error) {
+	var config GCSConfig
+	if err := s.UnmarshalKey("gcs", &config); err != nil {
+		return GCSConfig{}, err
+	}
+	return config, nil
 }

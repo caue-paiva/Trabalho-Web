@@ -11,6 +11,7 @@ import (
 
 	"backend/configs"
 	"backend/internal/clients"
+	"backend/internal/gateway/gcs"
 	httpHandler "backend/internal/http"
 	firestoreRepo "backend/internal/repository/firestore"
 	"backend/internal/server"
@@ -37,9 +38,24 @@ func main() {
 	// Initialize database using the config provider pattern
 	var db server.DBPort
 
-	// Initialize mock object store (replace with real implementation later)
-	objectStore := clients.NewMockObjectStore()
-	log.Println("Using mock object store (no actual file storage)")
+	// Initialize object store (GCS or mock fallback)
+	var objectStore server.ObjectStorePort
+	gcsGateway, err := gcs.NewGCSGatewayWithProvider(ctx, config)
+	if err != nil {
+		log.Printf("Warning: Failed to initialize GCS: %v", err)
+		log.Println("Falling back to mock object store (no actual file storage)")
+		objectStore = clients.NewMockObjectStore()
+	} else {
+		objectStore = clients.NewObjectClient(gcsGateway)
+		gcsConfig, _ := config.GetGCSConfig()
+		log.Printf("GCS initialized successfully")
+		log.Printf("  Bucket: %s", gcsConfig.BucketName)
+		log.Printf("  Project: %s", gcsConfig.ProjectID)
+		log.Printf("  Public access: %v", gcsConfig.MakePublic)
+
+		// Close GCS client on shutdown
+		defer gcsGateway.Close()
+	}
 
 	// Create DB repository using the config provider
 	log.Println("Initializing Firestore...")

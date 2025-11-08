@@ -10,3 +10,11 @@ collections:
   texts: test_texts
   timelines: test_timelines
   images: test_images
+
+# Google Cloud Storage configuration
+gcs:
+  bucket_name: sitegrupysanca.appspot.com
+  credentials_path: sitegrupysanca-firebase-adminsdk-fbsvc-ff7567bd6e.json
+  project_id: sitegrupysanca
+  make_public: true
+  signed_url_expiry_minutes: 15

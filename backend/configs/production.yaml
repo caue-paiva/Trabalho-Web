@@ -10,3 +10,11 @@ collections:
   texts: texts
   timelines: timeline_entries
   images: images
+
+# Google Cloud Storage configuration
+gcs:
+  bucket_name: sitegrupysanca.appspot.com
+  credentials_path: /secrets/firebase-credentials.json
+  project_id: sitegrupysanca
+  make_public: true
+  signed_url_expiry_minutes: 15
