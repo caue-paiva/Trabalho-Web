@@ -38,7 +38,7 @@ type TimelineEntryResponse struct {
 
 func ToTimelineEntryEntity(req CreateTimelineEntryRequest) (entities.TimelineEntry, error) {
 	// Parse date
-	date, err := time.Parse("2006-01-02", req.Date)
+	date, err := time.Parse(time.RFC3339, req.Date)
 	if err != nil {
 		return entities.TimelineEntry{}, fmt.Errorf("invalid date format: %w", err)
 	}
