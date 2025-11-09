@@ -17,6 +17,7 @@ const Navigation = () => {
     { href: "/historia", label: t("navigation.history") },
     { href: "/galeria", label: t("navigation.gallery") },
     { href: "/codigo-conduta", label: t("navigation.codeOfConduct") },
+    { href: "/contato", label: t("navigation.contact") },
   ];
 
   const socialLinks = [
@@ -39,16 +40,15 @@ const Navigation = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location.pathname === item.href
+                className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === item.href
                     ? "text-primary border-b-2 border-primary pb-1"
                     : "text-foreground"
-                }`}
+                  }`}
               >
                 {item.label}
               </Link>
             ))}
-            
+
             <div className="flex items-center space-x-2 border-l border-border pl-4">
               <ThemeToggle />
               <LanguageToggle />
@@ -91,16 +91,15 @@ const Navigation = () => {
                   key={item.href}
                   to={item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 rounded ${
-                    location.pathname === item.href
+                  className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 rounded ${location.pathname === item.href
                       ? "text-primary bg-secondary"
                       : "text-foreground"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </Link>
               ))}
-              
+
               <div className="flex items-center space-x-2 pt-2 border-t border-border">
                 <ThemeToggle />
                 <LanguageToggle />

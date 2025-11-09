@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Historia from "./pages/Historia";
 import Galeria from "./pages/Galeria";
 import CodigoConduta from "./pages/CodigoConduta";
+import Contato from "./pages/Contato";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/historia" element={<Historia />} />
               <Route path="/galeria" element={<Galeria />} />
               <Route path="/codigo-conduta" element={<CodigoConduta />} />
+              <Route path="/contato" element={<Contato />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -3,7 +3,8 @@
     "home": "Home",
     "history": "History",
     "gallery": "Gallery",
-    "codeOfConduct": "Code of Conduct"
+    "codeOfConduct": "Code of Conduct",
+    "contact": "Contact"
   },
   "home": {
     "title": "Welcome to Grupy Sanca",
@@ -120,6 +121,37 @@
       "safety": {
         "title": "Safe Environment",
         "description": "We do not tolerate harassment, discrimination or inappropriate behavior in any form, whether in person or online."
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Get in touch with us through our official channels.",
+    "github": {
+      "label": "GitHub",
+      "description": "Follow our projects, contribute code and see our work in development."
+    },
+    "email": {
+      "label": "Email",
+      "description": "Send us a message for questions, suggestions or partnerships. We'll respond as soon as possible."
+    },
+    "instagram": {
+      "label": "Instagram",
+      "description": "Follow us to stay updated on events, meetup photos and community news."
+    },
+    "telegram": {
+      "label": "Telegram",
+      "description": "Join our Telegram group for real-time conversations, networking and Python discussions."
+    },
+    "visitLink": "Visit",
+    "joinUs": {
+      "title": "Join us!",
+      "description": "Being part of Grupy Sanca is easy and free. Come be part of this amazing community!",
+      "benefits": {
+        "events": "Access to exclusive events and workshops",
+        "networking": "Connect with professionals in the field",
+        "learning": "Learn Python in a practical and fun way",
+        "community": "Be part of a welcoming and inclusive community"
       }
     }
   },
