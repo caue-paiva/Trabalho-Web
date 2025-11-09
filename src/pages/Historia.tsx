@@ -178,9 +178,22 @@ const Historia = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed mb-4">
                       {event.description}
                     </p>
+                    {/* Image placeholders - exclude first entry (2015) and 2020-2021 entry */}
+                    {index !== 0 && event.year !== "2020-2021" && (
+                      <div className={`grid gap-3 mt-4 ${index === 1 || index === 3 || index === 6 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                        {((index === 1 || index === 3 || index === 6) ? [1, 2] : [1]).map((imgIndex) => (
+                          <div key={imgIndex} className="bg-muted rounded-lg h-32 flex items-center justify-center">
+                            <div className="text-center text-muted-foreground">
+                              <Calendar className="h-8 w-8 mx-auto mb-1 opacity-50" />
+                              <p className="text-xs">Foto {imgIndex}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
