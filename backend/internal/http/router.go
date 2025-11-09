@@ -47,6 +47,13 @@ func NewRouter(srv server.Server) http.Handler {
 	// Events routes
 	mux.HandleFunc("GET /api/v1/events", eventsHandler.GetEvents)
 
+	// Health check endpoint
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Healthy"))
+	})
+
 	// Apply middleware (outermost to innermost)
 	var handler http.Handler = mux
 	handler = middleware.Recovery(handler)
