@@ -145,6 +145,281 @@ go test ./integration_tests -v -run TestImages_.*
 - Verify all expected fields present
 - Handle empty results gracefully
 
+## CURL Examples
+
+This section provides example CURL commands to manually test all API endpoints. The base URL is `http://localhost:8080/api/v1` (adjust if your server runs on a different port).
+
+### Texts Endpoints
+
+#### List All Texts
+```bash
+curl -X GET http://localhost:8080/api/v1/texts
+```
+
+#### Get Text by Slug
+```bash
+curl -X GET http://localhost:8080/api/v1/texts/my-text-slug
+```
+
+#### Get Text by ID
+```bash
+curl -X GET http://localhost:8080/api/v1/texts/id/abc123def456
+```
+
+#### Get Texts by Page Slug
+```bash
+curl -X GET http://localhost:8080/api/v1/texts/page/slug/historia
+```
+
+#### Get Texts by Page ID
+```bash
+curl -X GET http://localhost:8080/api/v1/texts/page/page-id-123
+```
+
+#### Create Text
+```bash
+curl -X POST http://localhost:8080/api/v1/texts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "my-text-slug",
+    "content": "This is the text content",
+    "page_slug": "historia"
+  }'
+```
+
+#### Update Text
+```bash
+curl -X PUT http://localhost:8080/api/v1/texts/abc123def456 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Updated text content",
+    "page_slug": "updated-page"
+  }'
+```
+
+#### Delete Text
+```bash
+curl -X DELETE http://localhost:8080/api/v1/texts/abc123def456
+```
+
+### Images Endpoints
+
+#### Get Image by ID
+```bash
+curl -X GET http://localhost:8080/api/v1/images/abc123def456
+```
+
+#### Get Images by Gallery Slug
+```bash
+curl -X GET http://localhost:8080/api/v1/images/gallery/my-gallery-slug
+```
+
+#### Create Image (Upload)
+```bash
+# First, encode your image to base64:
+# On macOS/Linux:
+IMAGE_BASE64=$(base64 -i path/to/image.png)
+
+# Then create the image:
+curl -X POST http://localhost:8080/api/v1/images \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"slug\": \"my-gallery-slug\",
+    \"name\": \"My Image Name\",
+    \"text\": \"Image description\",
+    \"date\": \"2024-01-15\",
+    \"location\": \"São Carlos, SP\",
+    \"data\": \"$IMAGE_BASE64\"
+  }"
+```
+
+**Note:** For testing, you can use a tiny 1x1 pixel PNG in base64:
+```bash
+curl -X POST http://localhost:8080/api/v1/images \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "test-gallery",
+    "name": "Test Image",
+    "text": "Test description",
+    "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+  }'
+```
+
+#### Update Image Metadata (without new image)
+```bash
+curl -X PUT http://localhost:8080/api/v1/images/abc123def456 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Image Name",
+    "text": "Updated description",
+    "location": "Updated Location"
+  }'
+```
+
+#### Update Image (with new image data)
+```bash
+# Encode new image to base64 first
+IMAGE_BASE64=$(base64 -i path/to/new-image.png)
+
+curl -X PUT http://localhost:8080/api/v1/images/abc123def456 \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\": \"Updated Image\",
+    \"data\": \"$IMAGE_BASE64\"
+  }"
+```
+
+#### Delete Image
+```bash
+curl -X DELETE http://localhost:8080/api/v1/images/abc123def456
+```
+
+### Timeline Endpoints
+
+#### List All Timeline Entries
+```bash
+curl -X GET http://localhost:8080/api/v1/timelineentries
+```
+
+#### Get Timeline Entry by ID
+```bash
+curl -X GET http://localhost:8080/api/v1/timelineentries/abc123def456
+```
+
+#### Create Timeline Entry
+```bash
+curl -X POST http://localhost:8080/api/v1/timelineentries \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "GrupySanca Meetup",
+    "text": "An important milestone in our history",
+    "location": "São Carlos, SP",
+    "date": "2024-11-08T12:00:00Z"
+  }'
+```
+
+**Note:** Date must be in RFC3339 format (ISO 8601). Examples:
+- `2024-11-08T12:00:00Z` (UTC)
+- `2024-11-08T12:00:00-03:00` (with timezone)
+
+#### Update Timeline Entry
+```bash
+curl -X PUT http://localhost:8080/api/v1/timelineentries/abc123def456 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Event Name",
+    "text": "Updated description",
+    "location": "Updated Location",
+    "date": "2024-12-20T14:00:00Z"
+  }'
+```
+
+#### Delete Timeline Entry
+```bash
+curl -X DELETE http://localhost:8080/api/v1/timelineentries/abc123def456
+```
+
+### Events Endpoints
+
+#### Get All Events
+```bash
+curl -X GET http://localhost:8080/api/v1/events
+```
+
+#### Get Events with Limit
+```bash
+curl -X GET "http://localhost:8080/api/v1/events?limit=5"
+```
+
+#### Get Events with Limit (larger)
+```bash
+curl -X GET "http://localhost:8080/api/v1/events?limit=100"
+```
+
+**Note:** The events endpoint fetches data from an external API. Query parameters like `limit` are supported, but `orderBy` and `desc` may not be fully supported by the external API.
+
+### Error Handling Examples
+
+#### Test 404 Not Found (Text)
+```bash
+curl -X GET http://localhost:8080/api/v1/texts/non-existent-slug-12345
+# Expected: 404 Not Found
+```
+
+#### Test 404 Not Found (Image)
+```bash
+curl -X GET http://localhost:8080/api/v1/images/non-existent-id-12345
+# Expected: 404 Not Found
+```
+
+#### Test 404 Not Found (Timeline)
+```bash
+curl -X GET http://localhost:8080/api/v1/timelineentries/non-existent-id-12345
+# Expected: 404 Not Found
+```
+
+#### Test Invalid Base64 (Image)
+```bash
+curl -X POST http://localhost:8080/api/v1/images \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Invalid Image",
+    "text": "This has invalid base64 data",
+    "data": "not-valid-base64!@#$%"
+  }'
+# Expected: 400 Bad Request
+```
+
+#### Test Invalid Date Format (Timeline)
+```bash
+curl -X POST http://localhost:8080/api/v1/timelineentries \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Invalid Date Event",
+    "text": "This has an invalid date",
+    "date": "not-a-valid-date"
+  }'
+# Expected: 400 Bad Request
+```
+
+### Pretty-Printing JSON Responses
+
+For better readability, pipe responses through `jq` (if installed):
+
+```bash
+curl -X GET http://localhost:8080/api/v1/texts | jq
+```
+
+Or use Python:
+```bash
+curl -X GET http://localhost:8080/api/v1/texts | python -m json.tool
+```
+
+### Saving Responses to Files
+
+```bash
+# Save response to file
+curl -X GET http://localhost:8080/api/v1/texts -o response.json
+
+# Save with pretty formatting
+curl -X GET http://localhost:8080/api/v1/texts | jq > response.json
+```
+
+### Testing with Different Base URLs
+
+If your server runs on a different host/port, set a variable:
+
+```bash
+BASE_URL="http://localhost:8080/api/v1"
+curl -X GET "$BASE_URL/texts"
+```
+
+For production or staging:
+```bash
+BASE_URL="https://api.example.com/api/v1"
+curl -X GET "$BASE_URL/texts"
+```
+
 ## Test Characteristics
 
 ### Cleanup Strategy
