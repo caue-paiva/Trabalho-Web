@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Github, Instagram, Twitter } from "lucide-react";
+import { Menu, X, Github, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
+import { TelegramIcon } from "@/components/Icon";
 import grupyLogo from "@/assets/grupy-logo.png";
 
 const Navigation = () => {
@@ -21,9 +22,9 @@ const Navigation = () => {
   ];
 
   const socialLinks = [
-    { href: "https://github.com/grupy-sanca", icon: Github, label: "GitHub" },
-    { href: "#", icon: Instagram, label: "Instagram" },
-    { href: "#", icon: Twitter, label: "Twitter" },
+    { href: "https://github.com/grupy-sanca", icon: Github, label: "GitHub", isCustom: false },
+    { href: "https://instagram.com/grupysanca", icon: Instagram, label: "Instagram", isCustom: false },
+    { href: "https://t.me/grupysanca", icon: TelegramIcon, label: "Telegram", isCustom: true },
   ];
 
   return (
@@ -41,8 +42,8 @@ const Navigation = () => {
                 key={item.href}
                 to={item.href}
                 className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === item.href
-                    ? "text-primary border-b-2 border-primary pb-1"
-                    : "text-foreground"
+                  ? "text-primary border-b-2 border-primary pb-1"
+                  : "text-foreground"
                   }`}
               >
                 {item.label}
@@ -61,7 +62,11 @@ const Navigation = () => {
                   className="hover:bg-secondary"
                 >
                   <a href={social.href} target="_blank" rel="noopener noreferrer">
-                    <social.icon className="h-4 w-4" />
+                    {social.isCustom ? (
+                      <TelegramIcon size={16} className="text-foreground" />
+                    ) : (
+                      <social.icon className="h-4 w-4" />
+                    )}
                     <span className="sr-only">{social.label}</span>
                   </a>
                 </Button>
@@ -92,8 +97,8 @@ const Navigation = () => {
                   to={item.href}
                   onClick={() => setIsOpen(false)}
                   className={`text-sm font-medium transition-colors hover:text-primary px-2 py-1 rounded ${location.pathname === item.href
-                      ? "text-primary bg-secondary"
-                      : "text-foreground"
+                    ? "text-primary bg-secondary"
+                    : "text-foreground"
                     }`}
                 >
                   {item.label}
@@ -112,7 +117,11 @@ const Navigation = () => {
                     className="hover:bg-secondary"
                   >
                     <a href={social.href} target="_blank" rel="noopener noreferrer">
-                      <social.icon className="h-4 w-4" />
+                      {social.isCustom ? (
+                        <TelegramIcon size={16} className="text-foreground" />
+                      ) : (
+                        <social.icon className="h-4 w-4" />
+                      )}
                       <span className="sr-only">{social.label}</span>
                     </a>
                   </Button>

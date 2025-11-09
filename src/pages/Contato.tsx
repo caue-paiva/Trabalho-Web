@@ -1,7 +1,8 @@
-import { Github, Mail, Instagram, MessageCircle, ExternalLink } from "lucide-react";
+import { Github, Mail, Instagram, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/useLanguage";
+import { TelegramIcon } from "@/components/Icon";
 
 const Contato = () => {
     const { t } = useLanguage();
@@ -29,7 +30,7 @@ const Contato = () => {
             color: "text-pink-500"
         },
         {
-            icon: MessageCircle,
+            icon: TelegramIcon,
             label: t("contact.telegram.label"),
             href: "https://t.me/grupysanca",
             description: t("contact.telegram.description"),
@@ -57,7 +58,11 @@ const Contato = () => {
                             <CardHeader>
                                 <div className="flex items-center gap-4 mb-2">
                                     <div className={`p-3 rounded-lg bg-secondary/10 ${contact.color}`}>
-                                        <contact.icon className="h-6 w-6" />
+                                        {contact.icon === TelegramIcon ? (
+                                            <TelegramIcon size={24} className={contact.color} />
+                                        ) : (
+                                            <contact.icon className="h-6 w-6" />
+                                        )}
                                     </div>
                                     <CardTitle className="text-xl">{contact.label}</CardTitle>
                                 </div>
