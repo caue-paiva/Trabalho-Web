@@ -3,7 +3,7 @@
 # Firebase configuration
 firebase:
   project_id: sitegrupysanca
-  credentials_path: /secrets/firebase-credentials.json
+  credentials_path: /secrets/firebase-credentials
 
 # Firebase collection paths/names
 collections:
@@ -14,7 +14,7 @@ collections:
 # Google Cloud Storage configuration
 gcs:
   bucket_name: sitegrupysanca.firebasestorage.app
-  credentials_path: /secrets/firebase-credentials.json
+  credentials_path: /secrets/firebase-credentials
   project_id: sitegrupysanca
   make_public: true
   signed_url_expiry_minutes: 15

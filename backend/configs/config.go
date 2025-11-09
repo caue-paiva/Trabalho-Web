@@ -199,15 +199,23 @@ func (s *configService) GetCredentialsJSON(filename string) ([]byte, error) {
 	}
 
 	// Find project root by walking up to find go.mod
+	// If go.mod not found (e.g., in Docker container), use current working directory
 	projectRoot, err := findProjectRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to find project root: %w", err)
+		// Fallback to current working directory (for Docker containers without go.mod)
+		projectRoot, err = os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("failed to find project root or get working directory: %w", err)
+		}
 	}
 
 	// Try configs directory first, then project root
 	possiblePaths := []string{
 		filepath.Join(projectRoot, "configs", filename),
 		filepath.Join(projectRoot, filename),
+		// Also try relative to current working directory (for Docker)
+		filepath.Join("configs", filename),
+		filename, // Direct filename (if in same directory)
 	}
 
 	for _, path := range possiblePaths {
