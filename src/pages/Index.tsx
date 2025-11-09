@@ -96,7 +96,7 @@ const Index = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button size="lg" className="px-8 py-3 text-lg" asChild>
-                  <a href="#sobre">
+                  <a href="/historia">
                     {t("home.learnHistory")}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </a>
