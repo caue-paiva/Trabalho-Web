@@ -30,7 +30,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <img src={grupyLogo} alt="Grupy São Carlos" className="h-8 w-auto" />
+            <img src={grupyLogo} alt="Grupy Sanca" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

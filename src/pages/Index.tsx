@@ -16,7 +16,7 @@ const Index = () => {
           <div className="float mb-8">
             <img 
               src={grupyLogo} 
-              alt="Grupy São Carlos" 
+              alt="Grupy Sanca" 
               className="h-24 w-auto mx-auto mb-6"
             />
           </div>

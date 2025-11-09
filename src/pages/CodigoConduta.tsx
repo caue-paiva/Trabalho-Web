@@ -58,7 +58,7 @@ const CodigoConduta = () => {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Este código de conduta aplica-se a todos os eventos, espaços online e comunicações 
-            relacionadas ao Grupy São Carlos.
+            relacionadas ao Grupy Sanca.
           </AlertDescription>
         </Alert>
 
@@ -67,7 +67,7 @@ const CodigoConduta = () => {
           <h2 className="text-3xl font-bold text-foreground mb-6">Nossa missão</h2>
           <div className="prose prose-lg text-muted-foreground leading-relaxed">
             <p className="mb-4">
-              O Grupy São Carlos tem o compromisso de ser uma comunidade livre de assédio para 
+              O Grupy Sanca tem o compromisso de ser uma comunidade livre de assédio para 
               todos, independentemente do sexo, identidade de gênero e expressão, idade, orientação 
               sexual, deficiência, aparência física, tamanho corporal, cor de pele, etnia, religião 
               (ou falta dela) ou escolhas de tecnologias.
