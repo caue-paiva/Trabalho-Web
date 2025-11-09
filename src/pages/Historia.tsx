@@ -12,7 +12,7 @@ const Historia = () => {
       location: "IFSP São Carlos"
     },
     {
-      year: "2016", 
+      year: "2016",
       title: "Primeiro Workshop Oficial",
       description: "Organizamos nosso primeiro workshop sobre Django, marcando o início das atividades educacionais regulares.",
       participants: 25,
@@ -94,7 +94,7 @@ const Historia = () => {
             Nossa História
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Conheça a trajetória do Grupy Sanca, desde sua fundação até os dias atuais, 
+            Conheça a trajetória do Grupy Sanca, desde sua fundação até os dias atuais,
             e como nos tornamos uma referência na comunidade Python regional.
           </p>
         </div>
@@ -104,17 +104,17 @@ const Historia = () => {
           <h2 className="text-3xl font-bold text-foreground mb-6">Como tudo começou</h2>
           <div className="prose prose-lg text-muted-foreground leading-relaxed">
             <p className="mb-4">
-              Em 2015, um pequeno grupo de entusiastas do Python em São Carlos percebeu a necessidade 
-              de criar um espaço local para compartilhar conhecimento e experiências sobre esta linguagem 
+              Em 2015, um pequeno grupo de entusiastas do Python em São Carlos percebeu a necessidade
+              de criar um espaço local para compartilhar conhecimento e experiências sobre esta linguagem
               que estava crescendo rapidamente no cenário tecnológico brasileiro.
             </p>
             <p className="mb-4">
-              Inspirados pelos grupos de usuários Python (GruPys) que já existiam em outras cidades como 
-              São Paulo, Rio de Janeiro e Campinas, decidimos fundar o Grupy Sanca com o objetivo 
+              Inspirados pelos grupos de usuários Python (Grupys) que já existiam em outras cidades como
+              São Paulo, Rio de Janeiro e Campinas, decidimos fundar o Grupy Sanca com o objetivo
               de democratizar o acesso ao conhecimento sobre Python na região.
             </p>
             <p>
-              O que começou como encontros informais em cafés e salas emprestadas, rapidamente evoluiu 
+              O que começou como encontros informais em cafés e salas emprestadas, rapidamente evoluiu
               para uma comunidade estruturada que hoje é referência no interior paulista.
             </p>
           </div>
@@ -160,7 +160,7 @@ const Historia = () => {
                     <div className="w-px bg-border h-24 mt-4"></div>
                   )}
                 </div>
-                
+
                 <Card className="flex-1 hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="flex items-start justify-between flex-wrap gap-2">
@@ -196,7 +196,7 @@ const Historia = () => {
           <p className="text-center text-muted-foreground mb-8">
             Algumas fotos marcantes da nossa trajetória ao longo dos anos.
           </p>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((index) => (
               <div key={index} className="bg-muted rounded-lg h-48 flex items-center justify-center">
@@ -208,7 +208,7 @@ const Historia = () => {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center mt-8">
             <p className="text-muted-foreground">
               Quer contribuir com fotos históricas? Entre em contato conosco!

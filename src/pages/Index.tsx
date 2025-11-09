@@ -7,28 +7,28 @@ import grupyLogo from "@/assets/grupy-logo.png";
 
 const Index = () => {
   const { t } = useLanguage();
-  
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="gradient-hero py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <div className="float mb-8">
-            <img 
-              src={grupyLogo} 
-              alt="Grupy Sanca" 
+            <img
+              src={grupyLogo}
+              alt="Grupy Sanca"
               className="h-24 w-auto mx-auto mb-6"
             />
           </div>
-          
+
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 fade-in">
             {t("home.title")}
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
             {t("home.subtitle")}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" className="px-8 py-3 text-lg" asChild>
               <a href="#sobre">
@@ -36,8 +36,8 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </a>
             </Button>
-            
-            <Button variant="outline" size="lg" className="px-8 py-3 text-lg" asChild>
+
+            <Button size="lg" className="px-8 py-3 text-lg text-black font-semibold hover:opacity-90" style={{ backgroundColor: '#FADA5E' }} asChild>
               <a href="https://eventos.grupysanca.com.br" target="_blank" rel="noopener noreferrer">
                 {t("home.viewEvents")}
                 <Calendar className="ml-2 h-5 w-5" />
@@ -116,7 +116,7 @@ const Index = () => {
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                 {t("home.eventsDescription")}
               </p>
-              
+
               <div className="space-y-4 mb-8">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -161,7 +161,7 @@ const Index = () => {
           <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
             {t("home.joinDescription")}
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="px-8 py-3 text-lg" asChild>
               <a href="/historia">
@@ -169,7 +169,7 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </a>
             </Button>
-            
+
             <Button variant="outline" size="lg" className="px-8 py-3 text-lg" asChild>
               <a href="/galeria">
                 {t("home.seePhotos")}
