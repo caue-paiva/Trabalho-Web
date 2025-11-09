@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG GO_VERSION=1.24
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS build
+FROM golang:${GO_VERSION}-alpine AS build
 
 ENV GOTOOLCHAIN=auto \
     GOPROXY=https://proxy.golang.org,direct
