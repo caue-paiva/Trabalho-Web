@@ -2,7 +2,6 @@ import { ArrowRight, Code, Users, Calendar, Heart, Clock, MapPin } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import EventWidget from "@/components/EventWidget";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState, useEffect } from "react";
 import grupyLogo from "@/assets/grupy-logo.png";
@@ -243,53 +242,6 @@ const Index = () => {
                 </p>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Events Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                {t("home.upcomingEvents")}
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                {t("home.eventsDescription")}
-              </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">
-                    <strong>{t("home.features.workshops")}</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
-                  <span className="text-muted-foreground">
-                    <strong>{t("home.features.talks")}</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-accent rounded-full"></div>
-                  <span className="text-muted-foreground">
-                    <strong>{t("home.features.networking")}</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span className="text-muted-foreground">
-                    <strong>{t("home.features.dojos")}</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <EventWidget />
-            </div>
           </div>
         </div>
       </section>
