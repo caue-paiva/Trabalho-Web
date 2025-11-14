@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"backend/internal/entities"
-	"backend/internal/platform/errors"
+	customerrors "backend/internal/platform/errors"
 	"backend/internal/server"
 )
 
@@ -45,7 +45,7 @@ func (r *DBRepository) GetTextBySlug(ctx context.Context, slug string) (entities
 	iter := r.client.Collection(r.collections.Texts).Where("slug", "==", slug).Limit(1).Documents(ctx)
 	doc, err := iter.Next()
 	if err == iterator.Done {
-		return entities.Text{}, fmt.Errorf("text with slug %s not found: %w", slug, errors.ErrNotFound)
+		return entities.Text{}, fmt.Errorf("text with slug %s not found: %w", slug, customerrors.ErrNotFound)
 	}
 	if err != nil {
 		return entities.Text{}, fmt.Errorf("error fetching text: %w", err)
@@ -63,7 +63,7 @@ func (r *DBRepository) GetTextByID(ctx context.Context, id string) (entities.Tex
 	doc, err := r.client.Collection(r.collections.Texts).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.Text{}, fmt.Errorf("text with id %s not found: %w", id, errors.ErrNotFound)
+			return entities.Text{}, fmt.Errorf("text with id %s not found: %w", id, customerrors.ErrNotFound)
 		}
 		return entities.Text{}, fmt.Errorf("error fetching text: %w", err)
 	}
@@ -140,7 +140,7 @@ func (r *DBRepository) UpdateText(ctx context.Context, id string, patch entities
 
 	if _, err := docRef.Update(ctx, updates); err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.Text{}, fmt.Errorf("text with id %s not found: %w", id, errors.ErrNotFound)
+			return entities.Text{}, fmt.Errorf("text with id %s not found: %w", id, customerrors.ErrNotFound)
 		}
 		return entities.Text{}, fmt.Errorf("error updating text: %w", err)
 	}
@@ -164,7 +164,7 @@ func (r *DBRepository) GetImageByID(ctx context.Context, id string) (entities.Im
 	doc, err := r.client.Collection(r.collections.Images).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.Image{}, fmt.Errorf("%w: image with id %s not found", errors.ErrNotFound, id)
+			return entities.Image{}, fmt.Errorf("%w: image with id %s not found", customerrors.ErrNotFound, id)
 		}
 		return entities.Image{}, fmt.Errorf("error fetching image: %w", err)
 	}
@@ -237,7 +237,7 @@ func (r *DBRepository) UpdateImageMeta(ctx context.Context, id string, patch ent
 
 	if _, err := docRef.Update(ctx, updates); err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.Image{}, fmt.Errorf("image with id %s not found: %w", id, errors.ErrNotFound)
+			return entities.Image{}, fmt.Errorf("image with id %s not found: %w", id, customerrors.ErrNotFound)
 		}
 		return entities.Image{}, fmt.Errorf("error updating image: %w", err)
 	}
@@ -261,7 +261,7 @@ func (r *DBRepository) GetTimelineEntryByID(ctx context.Context, id string) (ent
 	doc, err := r.client.Collection(r.collections.TimelineEntries).Doc(id).Get(ctx)
 	if err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.TimelineEntry{}, fmt.Errorf("timeline entry with id %s not found: %w", id, errors.ErrNotFound)
+			return entities.TimelineEntry{}, fmt.Errorf("timeline entry with id %s not found: %w", id, customerrors.ErrNotFound)
 		}
 		return entities.TimelineEntry{}, fmt.Errorf("error fetching timeline entry: %w", err)
 	}
@@ -328,7 +328,7 @@ func (r *DBRepository) UpdateTimelineEntry(ctx context.Context, id string, patch
 
 	if _, err := docRef.Update(ctx, updates); err != nil {
 		if status.Code(err) == codes.NotFound {
-			return entities.TimelineEntry{}, fmt.Errorf("timeline entry with id %s not found: %w", id, errors.ErrNotFound)
+			return entities.TimelineEntry{}, fmt.Errorf("timeline entry with id %s not found: %w", id, customerrors.ErrNotFound)
 		}
 		return entities.TimelineEntry{}, fmt.Errorf("error updating timeline entry: %w", err)
 	}

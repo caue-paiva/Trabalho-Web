@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 type FirebaseConfig struct {
 	ProjectID       string `yaml:"project_id"`
 	CredentialsPath string `yaml:"credentials_path"`
+	CredentialsJSON []byte
 }
 
 // Collections holds the names of Firestore collections loaded from YAML
@@ -48,6 +50,9 @@ type ConfigClient interface {
 
 	// GetFirebaseConfig returns the Firebase configuration
 	GetFirebaseConfig() (FirebaseConfig, error)
+
+	// GetFirebaseConfig returns the Firebase configuration reading the Credentials File into a JSON bytes field
+	GetFirebaseConfigWithJSONBytes() (FirebaseConfig, error)
 
 	// GetCollections returns the Firestore collection names
 	GetCollections() (Collections, error)
@@ -258,6 +263,25 @@ func (s *configService) GetFirebaseConfig() (FirebaseConfig, error) {
 		return FirebaseConfig{}, err
 	}
 	return config, nil
+}
+
+func (s *configService) GetFirebaseConfigWithJSONBytes() (FirebaseConfig, error) {
+	cfg, err := s.GetFirebaseConfig()
+	if err != nil {
+		return FirebaseConfig{}, err
+	}
+
+	jsonBytes, err := s.GetCredentialsJSON(cfg.CredentialsPath)
+	if err != nil {
+		return FirebaseConfig{}, err
+	}
+
+	if len(jsonBytes) == 0 {
+		return FirebaseConfig{}, errors.New("credentials JSON file has len 0")
+	}
+
+	cfg.CredentialsJSON = jsonBytes
+	return cfg, nil
 }
 
 // GetCollections returns the Firestore collection names

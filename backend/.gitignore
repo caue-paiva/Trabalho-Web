@@ -37,4 +37,4 @@ configs/*.local.yaml
 
 #json and other secrets
 *.json
-**firebase**
+**firebase-admins**

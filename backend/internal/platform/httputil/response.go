@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"backend/internal/platform/errors"
+	customerrors "backend/internal/platform/errors"
 )
 
 // ErrorResponse represents an error response
@@ -32,7 +32,7 @@ func Error(w http.ResponseWriter, err error, status int) {
 
 // ErrorFromDomain writes an error response using domain error mapping
 func ErrorFromDomain(w http.ResponseWriter, err error) {
-	status := errors.HTTPStatusFromError(err)
+	status := customerrors.HTTPStatusFromError(err)
 	Error(w, err, status)
 }
 
