@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState, useEffect } from "react";
-import grupyLogo from "@/assets/logo_grupy_branca.svg";
 
 interface Event {
   id: string;
@@ -80,7 +79,7 @@ const Index = () => {
             <div className="text-center lg:text-left">
               <div className="float mb-8">
                 <img
-                  src={grupyLogo}
+                  src="/logo_grupy_branca.svg"
                   alt="Grupy Sanca"
                   className="h-24 w-auto mx-auto lg:mx-0 mb-6"
                 />

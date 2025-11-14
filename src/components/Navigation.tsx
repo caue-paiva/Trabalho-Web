@@ -6,7 +6,6 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
 import { TelegramIcon } from "@/components/Icon";
-import grupyLogo from "@/assets/logo_grupy_branca.svg";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +31,7 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <img src={grupyLogo} alt="Grupy Sanca" className="h-8 w-auto" />
+            <img src="/logo_grupy_branca.svg" alt="Grupy Sanca" className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

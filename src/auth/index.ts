@@ -13,6 +13,9 @@ export { useAuth } from './useAuth';
 // Route protection
 export { ProtectedRoute } from './ProtectedRoute';
 
+// Conditional rendering based on auth state
+export { AuthSwitch, ShowWhenAuthenticated, ShowWhenUnauthenticated } from './AuthSwitch';
+
 // HTTP client with auth
 export {
   fetchWithAuth,
