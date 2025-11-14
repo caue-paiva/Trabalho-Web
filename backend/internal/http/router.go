@@ -1,22 +1,25 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"backend/internal/http/handlers"
 	"backend/internal/platform/middleware"
 	"backend/internal/server"
+
 )
 
+
 // NewRouter creates and configures the HTTP router
-func NewRouter(srv server.Server) http.Handler {
+func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.Handler {
 	mux := http.NewServeMux()
 
 	// Create handlers
-	textsHandler := handlers.NewTextsHandler(srv)
-	imagesHandler := handlers.NewImagesHandler(srv)
-	timelineHandler := handlers.NewTimelineHandler(srv)
-	eventsHandler := handlers.NewEventsHandler(srv)
+	textsHandler := handlers.NewBaseHandler(srv)
+	imagesHandler := handlers.NewBaseHandler(srv)
+	timelineHandler := handlers.NewBaseHandler(srv)
+	eventsHandler := handlers.NewBaseHandler(srv)
 
 	// Register routes using Go 1.22+ pattern matching
 
@@ -26,23 +29,43 @@ func NewRouter(srv server.Server) http.Handler {
 	mux.HandleFunc("GET /api/v1/texts/id/{id}", textsHandler.GetTextByID)
 	mux.HandleFunc("GET /api/v1/texts/page/{pageId}", textsHandler.GetTextsByPageID)
 	mux.HandleFunc("GET /api/v1/texts/page/slug/{pageSlug}", textsHandler.GetTextsByPageSlug)
-	mux.HandleFunc("POST /api/v1/texts", textsHandler.CreateText)
-	mux.HandleFunc("PUT /api/v1/texts/{id}", textsHandler.UpdateText)
-	mux.HandleFunc("DELETE /api/v1/texts/{id}", textsHandler.DeleteText)
+
+	// Add auth middleware to non-get functions
+	mux.HandleFunc("POST /api/v1/texts",
+		middleware.NewAuthMiddlewareFunc(textsHandler.CreateText, opts.AuthConfig),
+	)
+	mux.HandleFunc("PUT /api/v1/texts/{id}",
+		middleware.NewAuthMiddlewareFunc(textsHandler.UpdateText, opts.AuthConfig),
+	)
+	mux.HandleFunc("DELETE /api/v1/texts/{id}",
+		middleware.NewAuthMiddlewareFunc(textsHandler.DeleteText, opts.AuthConfig),
+	)
 
 	// Images routes
 	mux.HandleFunc("GET /api/v1/images/{id}", imagesHandler.GetImageByID)
 	mux.HandleFunc("GET /api/v1/images/gallery/{slug}", imagesHandler.GetImagesByGallerySlug)
-	mux.HandleFunc("POST /api/v1/images", imagesHandler.CreateImage)
-	mux.HandleFunc("PUT /api/v1/images/{id}", imagesHandler.UpdateImage)
-	mux.HandleFunc("DELETE /api/v1/images/{id}", imagesHandler.DeleteImage)
+	mux.HandleFunc("POST /api/v1/images",
+		middleware.NewAuthMiddlewareFunc(imagesHandler.CreateImage, opts.AuthConfig),
+	)
+	mux.HandleFunc("PUT /api/v1/images/{id}",
+		middleware.NewAuthMiddlewareFunc(imagesHandler.UpdateImage, opts.AuthConfig),
+	)
+	mux.HandleFunc("DELETE /api/v1/images/{id}",
+		middleware.NewAuthMiddlewareFunc(imagesHandler.DeleteImage, opts.AuthConfig),
+	)
 
 	// Timeline routes
 	mux.HandleFunc("GET /api/v1/timelineentries", timelineHandler.ListTimelineEntries)
 	mux.HandleFunc("GET /api/v1/timelineentries/{id}", timelineHandler.GetTimelineEntryByID)
-	mux.HandleFunc("POST /api/v1/timelineentries", timelineHandler.CreateTimelineEntry)
-	mux.HandleFunc("PUT /api/v1/timelineentries/{id}", timelineHandler.UpdateTimelineEntry)
-	mux.HandleFunc("DELETE /api/v1/timelineentries/{id}", timelineHandler.DeleteTimelineEntry)
+	mux.HandleFunc("POST /api/v1/timelineentries",
+		middleware.NewAuthMiddlewareFunc(timelineHandler.CreateTimelineEntry, opts.AuthConfig),
+	)
+	mux.HandleFunc("PUT /api/v1/timelineentries/{id}",
+		middleware.NewAuthMiddlewareFunc(timelineHandler.UpdateTimelineEntry, opts.AuthConfig),
+	)
+	mux.HandleFunc("DELETE /api/v1/timelineentries/{id}",
+		middleware.NewAuthMiddlewareFunc(timelineHandler.DeleteTimelineEntry, opts.AuthConfig),
+	)
 
 	// Events routes
 	mux.HandleFunc("GET /api/v1/events", eventsHandler.GetEvents)

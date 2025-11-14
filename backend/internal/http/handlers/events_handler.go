@@ -6,20 +6,11 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/server"
 )
-
-type EventsHandler struct {
-	server server.Server
-}
-
-func NewEventsHandler(srv server.Server) *EventsHandler {
-	return &EventsHandler{server: srv}
-}
 
 // GetEvents handles GET /api/v1/events?limit=N&orderBy=starts-at&desc=true
 // Follows the same logic as the Grupy API query and filter field names: starts-at, ends-at, name, created-at, etc.
-func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetEvents(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
 	query := r.URL.Query()
 

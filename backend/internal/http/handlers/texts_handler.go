@@ -6,19 +6,10 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/server"
 )
 
-type TextsHandler struct {
-	server server.Server
-}
-
-func NewTextsHandler(srv server.Server) *TextsHandler {
-	return &TextsHandler{server: srv}
-}
-
 // ListTexts handles GET /api/v1/texts
-func (h *TextsHandler) ListTexts(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) ListTexts(w http.ResponseWriter, r *http.Request) {
 	texts, err := h.server.ListAllTexts(r.Context())
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
@@ -30,7 +21,7 @@ func (h *TextsHandler) ListTexts(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetTextBySlug handles GET /api/v1/texts/{slug}
-func (h *TextsHandler) GetTextBySlug(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetTextBySlug(w http.ResponseWriter, r *http.Request) {
 	slug := extractPathParam(r, "slug")
 
 	text, err := h.server.GetTextBySlug(r.Context(), slug)
@@ -44,7 +35,7 @@ func (h *TextsHandler) GetTextBySlug(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetTextByID handles GET /api/v1/texts/id/{id}
-func (h *TextsHandler) GetTextByID(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetTextByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	text, err := h.server.GetTextByID(r.Context(), id)
@@ -58,7 +49,7 @@ func (h *TextsHandler) GetTextByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetTextsByPageID handles GET /api/v1/texts/page/{pageId}
-func (h *TextsHandler) GetTextsByPageID(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetTextsByPageID(w http.ResponseWriter, r *http.Request) {
 	pageID := extractPathParam(r, "pageId")
 
 	texts, err := h.server.GetTextsByPageID(r.Context(), pageID)
@@ -72,7 +63,7 @@ func (h *TextsHandler) GetTextsByPageID(w http.ResponseWriter, r *http.Request) 
 }
 
 // GetTextsByPageSlug handles GET /api/v1/texts/page/slug/{pageSlug}
-func (h *TextsHandler) GetTextsByPageSlug(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetTextsByPageSlug(w http.ResponseWriter, r *http.Request) {
 	pageSlug := extractPathParam(r, "pageSlug")
 
 	texts, err := h.server.GetTextsByPageSlug(r.Context(), pageSlug)
@@ -86,7 +77,7 @@ func (h *TextsHandler) GetTextsByPageSlug(w http.ResponseWriter, r *http.Request
 }
 
 // CreateText handles POST /api/v1/texts
-func (h *TextsHandler) CreateText(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) CreateText(w http.ResponseWriter, r *http.Request) {
 	var req mapper.CreateTextRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httputil.Error(w, err, http.StatusBadRequest)
@@ -105,7 +96,7 @@ func (h *TextsHandler) CreateText(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateText handles PUT /api/v1/texts/{id}
-func (h *TextsHandler) UpdateText(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) UpdateText(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	var req mapper.UpdateTextRequest
@@ -126,7 +117,7 @@ func (h *TextsHandler) UpdateText(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteText handles DELETE /api/v1/texts/{id}
-func (h *TextsHandler) DeleteText(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) DeleteText(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	if err := h.server.DeleteText(r.Context(), id); err != nil {

@@ -6,19 +6,10 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/server"
 )
 
-type TimelineHandler struct {
-	server server.Server
-}
-
-func NewTimelineHandler(srv server.Server) *TimelineHandler {
-	return &TimelineHandler{server: srv}
-}
-
 // ListTimelineEntries handles GET /api/v1/timelineentries
-func (h *TimelineHandler) ListTimelineEntries(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) ListTimelineEntries(w http.ResponseWriter, r *http.Request) {
 	entries, err := h.server.ListTimelineEntries(r.Context())
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
@@ -30,7 +21,7 @@ func (h *TimelineHandler) ListTimelineEntries(w http.ResponseWriter, r *http.Req
 }
 
 // GetTimelineEntryByID handles GET /api/v1/timelineentries/{id}
-func (h *TimelineHandler) GetTimelineEntryByID(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetTimelineEntryByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	entry, err := h.server.GetTimelineEntryByID(r.Context(), id)
@@ -44,7 +35,7 @@ func (h *TimelineHandler) GetTimelineEntryByID(w http.ResponseWriter, r *http.Re
 }
 
 // CreateTimelineEntry handles POST /api/v1/timelineentries
-func (h *TimelineHandler) CreateTimelineEntry(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) CreateTimelineEntry(w http.ResponseWriter, r *http.Request) {
 	var req mapper.CreateTimelineEntryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httputil.Error(w, err, http.StatusBadRequest)
@@ -68,7 +59,7 @@ func (h *TimelineHandler) CreateTimelineEntry(w http.ResponseWriter, r *http.Req
 }
 
 // UpdateTimelineEntry handles PUT /api/v1/timelineentries/{id}
-func (h *TimelineHandler) UpdateTimelineEntry(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) UpdateTimelineEntry(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	var req mapper.UpdateTimelineEntryRequest
@@ -94,7 +85,7 @@ func (h *TimelineHandler) UpdateTimelineEntry(w http.ResponseWriter, r *http.Req
 }
 
 // DeleteTimelineEntry handles DELETE /api/v1/timelineentries/{id}
-func (h *TimelineHandler) DeleteTimelineEntry(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) DeleteTimelineEntry(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	if err := h.server.DeleteTimelineEntry(r.Context(), id); err != nil {

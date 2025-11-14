@@ -15,6 +15,8 @@ import (
 	httpHandler "backend/internal/http"
 	firestoreRepo "backend/internal/repository/firestore"
 	"backend/internal/server"
+	firebase "firebase.google.com/go/v4"
+
 )
 
 func main() {
@@ -22,6 +24,12 @@ func main() {
 
 	// Configuration
 	port := getEnv("PORT", "8080")
+
+	var shouldBypassAuth bool
+	// config to bypass auth for local testing
+	if bypassAuth := getEnv("BYPASS_AUTH", ""); bypassAuth != "" {
+		shouldBypassAuth = true
+	}
 
 	log.Println("Starting Media CMS Backend...")
 	log.Printf("Environment: %s", getEnv("RUNTIME_ENV", "development"))
@@ -79,6 +87,34 @@ func main() {
 
 	// Create unified server
 	srv := server.NewServer(db, objectStore, eventsClient)
+
+
+	var firebaseApp *firebase.App
+	fbCfgs, err := config.GetFirebaseConfigWithJSONBytes()
+	if err != nil {
+		log.Printf("Warning: Failed to initialize Firebase App client: %v", err)
+		log.Println("Continuing without firebase client (authorization will not work)")
+		firebaseApp = nil
+	} else {
+		firebaseApp, err = clients.NewFirebaseAppClient(ctx,fbCfgs)
+
+
+		db = dbRepo
+		defer dbRepo.Close()
+
+		// Log successful initialization
+		fbConfig, _ := config.GetFirebaseConfig()
+		collections, _ := config.GetCollections()
+		log.Printf("Firestore initialized successfully")
+		log.Printf("  Project: %s", fbConfig.ProjectID)
+		log.Printf("  Collections: texts=%s, images=%s, timelines=%s",
+			collections.Texts, collections.Images, collections.Timelines)
+	}
+
+	routerOpts := httpHandler.RouterOptions{}
+	if !shouldBypassAuth {
+		routerOpts.AuthConfig = 
+	}
 
 	// Create HTTP router
 	handler := httpHandler.NewRouter(srv)

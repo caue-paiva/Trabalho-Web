@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	authcfg "backend/internal/platform/auth"
 	customerrors "backend/internal/platform/errors"
 
 	"firebase.google.com/go/v4/auth"
@@ -37,5 +38,41 @@ func NewAuthMiddleware(ctx context.Context, authClient *auth.Client) Middleware 
 		}
 
 		return r, nil
+	}
+}
+
+func NewAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Request), authCfg authcfg.AuthConfig) func(w http.ResponseWriter, r *http.Request) {
+	if authCfg.Client == nil {
+		return func(w http.ResponseWriter, r *http.Request) {
+			nextHandle(w, r)
+		}
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		authHeader := r.Header.Get("Authorization")
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		idToken := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		if idToken == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// we will not use the idToken
+		_, err := authCfg.Client.VerifyIDToken(r.Context(), idToken)
+		if err != nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		nextHandle(w, r)
 	}
 }

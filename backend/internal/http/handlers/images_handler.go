@@ -6,19 +6,10 @@ import (
 
 	"backend/internal/http/mapper"
 	"backend/internal/platform/httputil"
-	"backend/internal/server"
 )
 
-type ImagesHandler struct {
-	server server.Server
-}
-
-func NewImagesHandler(srv server.Server) *ImagesHandler {
-	return &ImagesHandler{server: srv}
-}
-
 // GetImageByID handles GET /api/v1/images/{id}
-func (h *ImagesHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	img, err := h.server.GetImageByID(r.Context(), id)
@@ -32,7 +23,7 @@ func (h *ImagesHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImagesByGallerySlug handles GET /api/v1/images/gallery/{slug}
-func (h *ImagesHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Request) {
 	slug := extractPathParam(r, "slug")
 
 	images, err := h.server.GetImagesByGallerySlug(r.Context(), slug)
@@ -46,7 +37,7 @@ func (h *ImagesHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Re
 }
 
 // CreateImage handles POST /api/v1/images
-func (h *ImagesHandler) CreateImage(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) CreateImage(w http.ResponseWriter, r *http.Request) {
 	var req mapper.CreateImageRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		httputil.Error(w, err, http.StatusBadRequest)
@@ -70,7 +61,7 @@ func (h *ImagesHandler) CreateImage(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateImage handles PUT /api/v1/images/{id}
-func (h *ImagesHandler) UpdateImage(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) UpdateImage(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	var req mapper.UpdateImageRequest
@@ -96,7 +87,7 @@ func (h *ImagesHandler) UpdateImage(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteImage handles DELETE /api/v1/images/{id}
-func (h *ImagesHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	id := extractPathParam(r, "id")
 
 	if err := h.server.DeleteImage(r.Context(), id); err != nil {

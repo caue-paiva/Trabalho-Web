@@ -23,21 +23,21 @@ type ImageResponse struct {
 
 // CreateImageRequest represents the request body for creating an image
 type CreateImageRequest struct {
-	Slug string `json:"slug,omitempty"`
-	Name string `json:"name"`
-	Text string `json:"text"`
-	Date string `json:"date,omitempty"`
+	Slug     string `json:"slug,omitempty"`
+	Name     string `json:"name"`
+	Text     string `json:"text"`
+	Date     string `json:"date,omitempty"`
 	Location string `json:"location,omitempty"`
-	Data string `json:"data"` // Base64 encoded image
+	Data     string `json:"data"` // Base64 encoded image
 }
 
 // UpdateImageRequest represents the request body for updating an image
 type UpdateImageRequest struct {
-	Name string `json:"name,omitempty"`
-	Text string `json:"text,omitempty"`
-	Date string `json:"date,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Text     string `json:"text,omitempty"`
+	Date     string `json:"date,omitempty"`
 	Location string `json:"location,omitempty"`
-	Data string `json:"data,omitempty"` // Base64 encoded image (optional)
+	Data     string `json:"data,omitempty"` // Base64 encoded image (optional)
 }
 
 const (
