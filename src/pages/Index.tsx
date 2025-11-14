@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTheme } from "@/hooks/useTheme";
 import { useState, useEffect } from "react";
 
 interface Event {
@@ -16,6 +17,7 @@ interface Event {
 
 const Index = () => {
   const { t } = useLanguage();
+  const { actualTheme } = useTheme();
   const [featuredEvent, setFeaturedEvent] = useState<Event | null>(null);
 
   useEffect(() => {
@@ -79,9 +81,10 @@ const Index = () => {
             <div className="text-center lg:text-left">
               <div className="float mb-8">
                 <img
-                  src="/logo_grupy_branca.svg"
+                  src={actualTheme === "light" ? "/grupy-logo.png" : "/logo_grupy_branca.svg"}
                   alt="Grupy Sanca"
-                  className="h-24 w-auto mx-auto lg:mx-0 mb-6"
+                  className="h-24 w-auto mx-auto lg:mx-0 mb-6 object-contain"
+                  style={{ maxWidth: '360px', height: '96px' }}
                 />
               </div>
 

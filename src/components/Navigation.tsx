@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useTheme } from "@/hooks/useTheme";
 import { TelegramIcon } from "@/components/Icon";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { t } = useLanguage();
+  const { actualTheme } = useTheme();
 
   const navItems = [
     { href: "/", label: t("navigation.home") },
@@ -31,7 +33,12 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-            <img src="/logo_grupy_branca.svg" alt="Grupy Sanca" className="h-8 w-auto" />
+            <img
+              src={actualTheme === "light" ? "/grupy-logo.png" : "/logo_grupy_branca.svg"}
+              alt="Grupy Sanca"
+              className="h-8 w-auto object-contain"
+              style={{ maxWidth: '120px', height: '32px' }}
+            />
           </Link>
 
           {/* Desktop Navigation */}
