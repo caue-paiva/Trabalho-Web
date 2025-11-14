@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
 import { TelegramIcon } from "@/components/Icon";
-import grupyLogo from "@/assets/grupy-logo.png";
+import grupyLogo from "@/assets/logo_grupy_branca.svg";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);

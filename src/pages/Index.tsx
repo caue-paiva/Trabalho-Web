@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useState, useEffect } from "react";
-import grupyLogo from "@/assets/grupy-logo.png";
+import grupyLogo from "@/assets/logo_grupy_branca.svg";
 
 interface Event {
   id: string;
