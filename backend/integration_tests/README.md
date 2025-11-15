@@ -178,12 +178,60 @@ curl -X GET http://localhost:8080/api/v1/texts/page/page-id-123
 
 #### Create Text
 ```bash
+# Basic example (authentication may be required depending on server configuration)
 curl -X POST http://localhost:8080/api/v1/texts \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
   -d '{
     "slug": "my-text-slug",
     "content": "This is the text content",
     "page_slug": "historia"
+  }'
+```
+
+**Required fields:**
+- `slug` (string) - Unique identifier for the text
+- `content` (string) - The text content
+
+**Optional fields:**
+- `page_slug` (string) - Slug of the page this text belongs to
+- `page_id` (string) - ID of the page this text belongs to
+
+**Response (201 Created):**
+```json
+{
+  "id": "abc123def456",
+  "slug": "my-text-slug",
+  "content": "This is the text content",
+  "page_slug": "historia",
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Note:** The POST endpoint requires authentication if the server is configured with `AuthRequired`. If authentication is optional or disabled, you can omit the `Authorization` header. The server will return `401 Unauthorized` if authentication is required but not provided.
+
+**Example with minimal required fields:**
+```bash
+curl -X POST http://localhost:8080/api/v1/texts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  -d '{
+    "slug": "test-text-123",
+    "content": "Minimal text content"
+  }'
+```
+
+**Example with both page_slug and page_id (page_slug takes precedence):**
+```bash
+curl -X POST http://localhost:8080/api/v1/texts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  -d '{
+    "slug": "my-text-slug",
+    "content": "This is the text content",
+    "page_slug": "historia",
+    "page_id": "page-id-123"
   }'
 ```
 
@@ -325,6 +373,31 @@ curl -X DELETE http://localhost:8080/api/v1/timelineentries/abc123def456
 ```bash
 curl -X GET http://localhost:8080/api/v1/events
 ```
+
+### Authorization Endpoints
+
+#### Check Authorization Status
+```bash
+# This endpoint always requires authentication (uses NewForceAuthMiddlewareFunc)
+curl -X GET http://localhost:8080/authorized \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN"
+```
+
+**Response (200 OK) if authorized:**
+```json
+{
+  "authorized": true,
+  "message": "Request is authorized",
+  "status": "success"
+}
+```
+
+**Response (401 Unauthorized) if not authorized:**
+```
+Unauthorized
+```
+
+**Note:** This endpoint uses `NewForceAuthMiddlewareFunc` which always requires a valid Firebase ID token, regardless of the server's authentication level configuration. It's useful for checking if a token is valid and the request is properly authenticated.
 
 #### Get Events with Limit
 ```bash

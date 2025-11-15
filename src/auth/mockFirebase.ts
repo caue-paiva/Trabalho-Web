@@ -174,7 +174,8 @@ export const mockGetIdToken = async (user: MockUser): Promise<string> => {
   const token = `${header}.${payload}.${signature}`;
 
   console.log('✅ [MOCK] Token generated!');
-  console.log('   Token:', token.substring(0, 50) + '...');
+  console.log('   Full Token:', token);
+  console.log('   Token Length:', token.length);
 
   return token;
 };
@@ -202,7 +203,7 @@ export const mockOnAuthStateChanged = (callback: (user: MockUser | null) => void
  */
 export const isMockMode = (): boolean => {
   return import.meta.env.VITE_USE_MOCK_AUTH === 'true' ||
-         import.meta.env.VITE_FIREBASE_APIKEY === 'mock';
+    import.meta.env.VITE_FIREBASE_APIKEY === 'mock';
 };
 
 console.log('📦 [MOCK] Mock Firebase service loaded');

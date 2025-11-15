@@ -61,6 +61,8 @@ func main() {
 		log.Println("  GET  /api/v1/texts")
 		log.Println("  GET  /api/v1/images/{id}")
 		log.Println("  GET  /api/v1/timelineentries")
+		log.Println("  GET  /authorized (requires authentication)")
+		log.Println("  GET  /health")
 
 		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Server failed to start: %v", err)
@@ -196,6 +198,7 @@ func initializeRouter(ctx context.Context, srv server.Server, authClient *fireba
 	}
 
 	authLevel := config.GetAuthLevel()
+	log.Printf("[AUTH LEVEL] Configured Auth Level: %s", authLevel.String())
 
 	if authClient != nil {
 		routerOpts.AuthConfig = authPlatform.AuthConfig{

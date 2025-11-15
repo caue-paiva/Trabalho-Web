@@ -49,10 +49,27 @@ const Admin = () => {
   const showToken = async () => {
     try {
       const token = await getToken();
-      console.log('Current ID Token:', token);
-      alert(`Token copied to console!\n\nPreview: ${token?.substring(0, 50)}...`);
+      if (!token) {
+        alert('No token available. Please log in first.');
+        return;
+      }
+
+      // Print the entire token to console
+      console.log('Current ID Token (Full):', token);
+      console.log('Token Length:', token.length);
+
+      // Copy the entire token to clipboard
+      try {
+        await navigator.clipboard.writeText(token);
+        alert(`Full token copied to clipboard and logged to console!\n\nToken length: ${token.length} characters\n\nCheck the browser console (F12) to see the full token.`);
+      } catch (clipboardError) {
+        // Fallback if clipboard API is not available
+        console.error('Failed to copy to clipboard:', clipboardError);
+        alert(`Token logged to console!\n\nFull Token:\n${token}\n\nToken length: ${token.length} characters\n\nNote: Could not copy to clipboard automatically. Please copy from console or this alert.`);
+      }
     } catch (error) {
       console.error('Failed to get token:', error);
+      alert('Failed to get token. Check console for details.');
     }
   };
 

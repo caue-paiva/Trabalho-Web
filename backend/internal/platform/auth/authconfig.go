@@ -13,6 +13,18 @@ const (
 	AuthOptional
 )
 
+func (l AuthLevel) String() string {
+	switch l {
+
+	case AuthRequired:
+		return "required"
+	case AuthOptional:
+		return "optional"
+	default:
+		return "unknown"
+	}
+}
+
 func AuthLevelFromString(value string) AuthLevel {
 	lower := strings.ToLower(value)
 	switch lower {

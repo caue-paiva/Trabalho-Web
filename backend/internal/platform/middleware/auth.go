@@ -12,6 +12,7 @@ import (
 // Middleware is a func which takes in an http request and returns it and an error
 type Middleware func(*http.Request) (*http.Request, error)
 
+// NewAuthMiddlewareFunc wraps an HTTP handler and checks if the request to the endpoint is authorized given the current auth config
 func NewAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Request), authCfg authcfg.AuthConfig, logger *log.Logger) func(w http.ResponseWriter, r *http.Request) {
 	if authCfg.Client == nil {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,41 @@ func NewAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Reques
 			nextHandle(w, r)
 		}
 	}
+}
 
+func NewForceAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Request), authCfg authcfg.AuthConfig, logger *log.Logger) func(w http.ResponseWriter, r *http.Request) {
+	if authCfg.Client == nil {
+		return func(w http.ResponseWriter, r *http.Request) {
+			nextHandle(w, r)
+		}
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// log token extraction and enforce it
+		idToken, err := getIdToken(r)
+		if err != nil {
+			logTokenNotFound(logger, r, err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		logTokenFound(logger, r, idToken)
+
+		// Verify the token
+		_, err = authCfg.Client.VerifyIDToken(r.Context(), idToken)
+		if err != nil {
+			logTokenVerificationFailed(logger, r, idToken, err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		nextHandle(w, r)
+	}
 }
 
 // getRequestOrigin gets the origin from the request (Origin header or RemoteAddr)

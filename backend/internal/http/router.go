@@ -25,6 +25,7 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	imagesHandler := handlers.NewBaseHandler(srv)
 	timelineHandler := handlers.NewBaseHandler(srv)
 	eventsHandler := handlers.NewBaseHandler(srv)
+	authHandler := handlers.NewBaseHandler(srv)
 
 	// Register routes using Go 1.22+ pattern matching
 
@@ -74,6 +75,11 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 
 	// Events routes
 	mux.HandleFunc("GET /api/v1/events", eventsHandler.GetEvents)
+
+	// Authorization check endpoint (always requires authentication)
+	mux.HandleFunc("GET /authorized",
+		middleware.NewForceAuthMiddlewareFunc(authHandler.Authorized, opts.AuthConfig, opts.Logger),
+	)
 
 	// Health check endpoint
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
