@@ -7,7 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"backend/internal/platform/auth"
+
 	"gopkg.in/yaml.v3"
+)
+
+const (
+	_authLevelEnvVar = "AUTH_LEVEL"
 )
 
 // FirebaseConfig holds Firebase-specific configuration loaded from YAML
@@ -59,6 +65,9 @@ type ConfigClient interface {
 
 	// GetGCSConfig returns the Google Cloud Storage configuration
 	GetGCSConfig() (GCSConfig, error)
+
+	//GetAuthLevel gets configured auth level
+	GetAuthLevel() auth.AuthLevel
 }
 
 type configService struct {
@@ -117,6 +126,11 @@ func NewConfigService() (ConfigClient, error) {
 		data: configData,
 		env:  env,
 	}, nil
+}
+
+func (s *configService) GetAuthLevel() auth.AuthLevel {
+	authLevel := os.Getenv(_authLevelEnvVar)
+	return auth.AuthLevelFromString(authLevel)
 }
 
 // GetConfig returns a config value by key path
