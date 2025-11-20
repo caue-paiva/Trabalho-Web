@@ -25,9 +25,10 @@ type FirebaseConfig struct {
 
 // Collections holds the names of Firestore collections loaded from YAML
 type Collections struct {
-	Texts     string `yaml:"texts"`
-	Images    string `yaml:"images"`
-	Timelines string `yaml:"timelines"`
+	Texts        string `yaml:"texts"`
+	Images       string `yaml:"images"`
+	Timelines    string `yaml:"timelines"`
+	GaleryEvents string `yaml:"galery_events"`
 }
 
 // GCSConfig holds Google Cloud Storage configuration

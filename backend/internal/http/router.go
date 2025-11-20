@@ -25,6 +25,7 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	imagesHandler := handlers.NewBaseHandler(srv)
 	timelineHandler := handlers.NewBaseHandler(srv)
 	eventsHandler := handlers.NewBaseHandler(srv)
+	galeryEventHandler := handlers.NewBaseHandler(srv)
 	authHandler := handlers.NewBaseHandler(srv)
 
 	// Register routes using Go 1.22+ pattern matching
@@ -75,6 +76,13 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 
 	// Events routes
 	mux.HandleFunc("GET /api/v1/events", eventsHandler.GetEvents)
+
+	// GaleryEvent routes
+	mux.HandleFunc("GET /api/v1/galery_events", galeryEventHandler.ListGaleryEvents)
+	mux.HandleFunc("GET /api/v1/galery_events/{id}", galeryEventHandler.GetGaleryEventByID)
+	mux.HandleFunc("POST /api/v1/galery_events",
+		middleware.NewAuthMiddlewareFunc(galeryEventHandler.CreateGaleryEvent, opts.AuthConfig, opts.Logger),
+	)
 
 	// Authorization check endpoint (always requires authentication)
 	mux.HandleFunc("GET /authorized",

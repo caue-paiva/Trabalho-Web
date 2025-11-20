@@ -47,6 +47,7 @@ func NewFirestoreClientWithProvider(ctx context.Context, provider FirebaseConfig
 			Texts:           collections.Texts,
 			Images:          collections.Images,
 			TimelineEntries: collections.Timelines,
+			GaleryEvents:    collections.GaleryEvents,
 		},
 	}
 
@@ -73,6 +74,7 @@ func NewDBRepositoryWithProvider(ctx context.Context, provider FirebaseConfigPro
 		Texts:           collections.Texts,
 		Images:          collections.Images,
 		TimelineEntries: collections.Timelines,
+		GaleryEvents:    collections.GaleryEvents,
 	}
 
 	// Create and return DB repository

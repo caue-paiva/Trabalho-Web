@@ -31,6 +31,11 @@ type DBPort interface {
 	CreateTimelineEntry(ctx context.Context, entry entities.TimelineEntry) (entities.TimelineEntry, error)
 	UpdateTimelineEntry(ctx context.Context, id string, patch entities.TimelineEntry) (entities.TimelineEntry, error)
 	DeleteTimelineEntry(ctx context.Context, id string) error
+
+	// GaleryEvent operations
+	CreateGaleryEvent(ctx context.Context, event entities.GaleryEvent) (entities.GaleryEvent, error)
+	GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error)
+	ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error)
 }
 
 // ObjectStorePort defines the contract for object storage operations

@@ -14,6 +14,7 @@ type CollectionNames struct {
 	Texts           string
 	Images          string
 	TimelineEntries string
+	GaleryEvents    string
 }
 
 // FirestoreConfig holds configuration for Firestore client initialization

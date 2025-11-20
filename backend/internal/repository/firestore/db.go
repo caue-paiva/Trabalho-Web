@@ -410,3 +410,71 @@ func (r *DBRepository) timelineEntriesFromIterator(iter *firestore.DocumentItera
 	}
 	return entries, nil
 }
+
+// =======================
+// GALERY EVENT OPERATIONS
+// =======================
+
+func (r *DBRepository) CreateGaleryEvent(ctx context.Context, event entities.GaleryEvent) (entities.GaleryEvent, error) {
+	// Generate new document reference
+	docRef := r.client.Collection(r.collections.GaleryEvents).NewDoc()
+	event.ID = docRef.ID
+
+	// Set timestamps if not already set
+	if event.CreatedAt.IsZero() {
+		event.CreatedAt = time.Now()
+	}
+	if event.UpdatedAt.IsZero() {
+		event.UpdatedAt = time.Now()
+	}
+
+	// Create document
+	if _, err := docRef.Set(ctx, event); err != nil {
+		return entities.GaleryEvent{}, fmt.Errorf("error creating galery event: %w", err)
+	}
+
+	return event, nil
+}
+
+func (r *DBRepository) GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error) {
+	doc, err := r.client.Collection(r.collections.GaleryEvents).Doc(id).Get(ctx)
+	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			return entities.GaleryEvent{}, fmt.Errorf("galery event with id %s not found: %w", id, customerrors.ErrNotFound)
+		}
+		return entities.GaleryEvent{}, fmt.Errorf("error fetching galery event: %w", err)
+	}
+
+	var event entities.GaleryEvent
+	if err := doc.DataTo(&event); err != nil {
+		return entities.GaleryEvent{}, fmt.Errorf("error parsing galery event: %w", err)
+	}
+	event.ID = doc.Ref.ID
+	return event, nil
+}
+
+func (r *DBRepository) ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error) {
+	iter := r.client.Collection(r.collections.GaleryEvents).OrderBy("date", firestore.Desc).Documents(ctx)
+	return r.galeryEventsFromIterator(iter)
+}
+
+func (r *DBRepository) galeryEventsFromIterator(iter *firestore.DocumentIterator) ([]entities.GaleryEvent, error) {
+	var events []entities.GaleryEvent
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("error iterating galery events: %w", err)
+		}
+
+		var event entities.GaleryEvent
+		if err := doc.DataTo(&event); err != nil {
+			continue // Skip malformed documents
+		}
+		event.ID = doc.Ref.ID
+		events = append(events, event)
+	}
+	return events, nil
+}

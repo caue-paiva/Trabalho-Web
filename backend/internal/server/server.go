@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"time"
 
 	"backend/internal/entities"
 )
@@ -34,6 +35,11 @@ type Server interface {
 
 	// Events operations
 	GetEvents(ctx context.Context, limit int, orderBy string, desc bool) ([]entities.Event, error)
+
+	// GaleryEvent operations
+	CreateGaleryEvent(ctx context.Context, name, location string, date time.Time, imagesBase64 []string) (entities.GaleryEvent, error)
+	GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error)
+	ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error)
 }
 
 // server implements the Server interface

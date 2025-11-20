@@ -10,6 +10,7 @@ collections:
   texts: texts
   timelines: timeline_entries
   images: images
+  galery_events: galery_events
 
 # Google Cloud Storage configuration
 gcs:
