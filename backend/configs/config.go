@@ -85,7 +85,12 @@ func NewConfigService() (ConfigClient, error) {
 	}
 
 	// Validate environment
-	if env != "development" && env != "production" {
+	validEnvs := map[string]bool{
+		"development": true,
+		"production":  true,
+		"prod-local":  true,
+	}
+	if !validEnvs[env] {
 		env = "development"
 	}
 
