@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { Upload, Plus, Calendar, MapPin, Users, Image as ImageIcon, X } from "lucide-react";
+import { Calendar, MapPin, Users, Image as ImageIcon, ImagePlus, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
+import { FileUploadModal } from "@/components/FileUploadModal";
 
 interface Event {
   id: string;
@@ -83,15 +85,17 @@ const Galeria = () => {
   ]);
 
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [showUploadForm, setShowUploadForm] = useState(false);
-  const [newEvent, setNewEvent] = useState({
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [newEventData, setNewEventData] = useState({
     name: "",
     date: "",
     location: "",
-    description: ""
+    description: "",
   });
+  const [newEventImages, setNewEventImages] = useState<File[]>([]);
 
-  const allPhotos = events.flatMap(event => 
+  const allPhotos = events.flatMap(event =>
     event.photos.map(photo => ({
       ...photo,
       eventName: event.name,
@@ -100,19 +104,26 @@ const Galeria = () => {
     }))
   ).sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
 
-  const createEvent = () => {
-    const event: Event = {
-      id: Date.now().toString(),
-      ...newEvent,
-      photos: []
-    };
-    setEvents([...events, event]);
-    setNewEvent({ name: "", date: "", location: "", description: "" });
-    setShowUploadForm(false);
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleUploadImage = (files: File[]) => {
+    console.log('UploadImage event triggered with files:', files);
+    // TODO: Implement actual image upload logic
+  };
+
+  const handleCreateEvent = () => {
+    console.log('CreateEvent triggered with data:', {
+      eventData: newEventData,
+      images: newEventImages,
+    });
+    // TODO: Implement actual event creation logic
+
+    // Reset form
+    setNewEventData({ name: "", date: "", location: "", description: "" });
+    setNewEventImages([]);
+    setShowCreateEvent(false);
   };
 
   return (
@@ -128,89 +139,17 @@ const Galeria = () => {
           </p>
         </div>
 
-        {/* Upload Section */}
-        <div className="mb-12">
-          <Card className="gradient-section">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                Contribua com fotos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">
-                Participou de algum evento? Ajude a documentar nossa história compartilhando suas fotos!
-              </p>
-              
-              <Dialog open={showUploadForm} onOpenChange={setShowUploadForm}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Criar evento e adicionar fotos
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Criar novo evento</DialogTitle>
-                    <DialogDescription>
-                      Primeiro, vamos criar um evento para organizar suas fotos.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">Nome do evento</Label>
-                      <Input
-                        id="name"
-                        value={newEvent.name}
-                        onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
-                        placeholder="Ex: Workshop Python Básico"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="date">Data</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={newEvent.date}
-                        onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="location">Local</Label>
-                      <Input
-                        id="location"
-                        value={newEvent.location}
-                        onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                        placeholder="Ex: IFSP São Carlos"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="description">Descrição</Label>
-                      <Textarea
-                        id="description"
-                        value={newEvent.description}
-                        onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                        placeholder="Breve descrição do evento..."
-                        rows={3}
-                      />
-                    </div>
-                    <Button 
-                      onClick={createEvent} 
-                      className="w-full"
-                      disabled={!newEvent.name || !newEvent.date || !newEvent.location}
-                    >
-                      Criar evento
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Events Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-foreground mb-8">Eventos recentes</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Eventos recentes</h2>
+            <ShowWhenAuthenticated>
+              <Button onClick={() => setShowCreateEvent(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Criar Evento
+              </Button>
+            </ShowWhenAuthenticated>
+          </div>
           <div className="grid lg:grid-cols-2 gap-8">
             {events.map((event) => (
               <Card key={event.id} className="hover:shadow-lg transition-shadow">
@@ -278,7 +217,15 @@ const Galeria = () => {
 
         {/* All Photos Gallery */}
         <div>
-          <h2 className="text-3xl font-bold text-foreground mb-8">Todas as fotos</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-foreground">Todas as fotos</h2>
+            <ShowWhenAuthenticated>
+              <Button onClick={() => setShowImageUpload(true)} className="gap-2">
+                <ImagePlus className="h-4 w-4" />
+                Adicione Imagens
+              </Button>
+            </ShowWhenAuthenticated>
+          </div>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {allPhotos.map((photo) => (
               <div
@@ -304,9 +251,11 @@ const Galeria = () => {
               <p className="text-muted-foreground mb-4">
                 Seja o primeiro a compartilhar fotos de nossos eventos!
               </p>
-              <Button onClick={() => setShowUploadForm(true)}>
-                Adicionar primeira foto
-              </Button>
+              <ShowWhenAuthenticated>
+                <Button onClick={() => setShowImageUpload(true)}>
+                  Adicionar primeira foto
+                </Button>
+              </ShowWhenAuthenticated>
             </div>
           )}
         </div>
@@ -327,12 +276,12 @@ const Galeria = () => {
                   </Button>
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
                   <ImageIcon className="h-16 w-16 text-muted-foreground" />
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Calendar className="h-3 w-3" />
@@ -351,8 +300,244 @@ const Galeria = () => {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Image Upload Modal */}
+        <FileUploadModal
+          open={showImageUpload}
+          onOpenChange={setShowImageUpload}
+          onUpload={handleUploadImage}
+          title="Adicionar Imagens"
+          uploadButtonText="Enviar"
+          config={{
+            accept: "image/*",
+            maxSize: 10 * 1024 * 1024, // 10MB
+            multiple: true,
+            fileCategory: "image",
+          }}
+        />
+
+        {/* Create Event Modal */}
+        <CreateEventModal
+          open={showCreateEvent}
+          onOpenChange={setShowCreateEvent}
+          eventData={newEventData}
+          onEventDataChange={setNewEventData}
+          eventImages={newEventImages}
+          onEventImagesChange={setNewEventImages}
+          onSubmit={handleCreateEvent}
+        />
       </div>
     </div>
+  );
+};
+
+// Create Event Modal Component
+interface CreateEventModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  eventData: {
+    name: string;
+    date: string;
+    location: string;
+    description: string;
+  };
+  onEventDataChange: (data: any) => void;
+  eventImages: File[];
+  onEventImagesChange: (images: File[]) => void;
+  onSubmit: () => void;
+}
+
+const CreateEventModal: React.FC<CreateEventModalProps> = ({
+  open,
+  onOpenChange,
+  eventData,
+  onEventDataChange,
+  eventImages,
+  onEventImagesChange,
+  onSubmit,
+}) => {
+  const [showImageUpload, setShowImageUpload] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
+  const removeImage = (index: number) => {
+    onEventImagesChange(eventImages.filter((_, i) => i !== index));
+  };
+
+  const isFormValid =
+    eventData.name.trim() !== "" &&
+    eventData.date !== "" &&
+    eventData.location.trim() !== "" &&
+    eventData.description.trim() !== "";
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Criar Novo Evento
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Event Details */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="event-name">Nome do Evento *</Label>
+                <Input
+                  id="event-name"
+                  value={eventData.name}
+                  onChange={(e) =>
+                    onEventDataChange({ ...eventData, name: e.target.value })
+                  }
+                  placeholder="Ex: Workshop Python Básico"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="event-date">Data *</Label>
+                <Input
+                  id="event-date"
+                  type="date"
+                  value={eventData.date}
+                  onChange={(e) =>
+                    onEventDataChange({ ...eventData, date: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="event-location">Localização *</Label>
+                <Input
+                  id="event-location"
+                  value={eventData.location}
+                  onChange={(e) =>
+                    onEventDataChange({ ...eventData, location: e.target.value })
+                  }
+                  placeholder="Ex: IFSP São Carlos"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="event-description">Descrição do Evento *</Label>
+                <Textarea
+                  id="event-description"
+                  value={eventData.description}
+                  onChange={(e) =>
+                    onEventDataChange({ ...eventData, description: e.target.value })
+                  }
+                  placeholder="Breve descrição do evento..."
+                  rows={4}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Event Images */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Imagens do Evento</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowImageUpload(true)}
+                  className="gap-2"
+                >
+                  <ImagePlus className="h-4 w-4" />
+                  Adicionar Imagens
+                </Button>
+              </div>
+
+              {eventImages.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {eventImages.length} imagem(ns) selecionada(s)
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {eventImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
+                      >
+                        <img
+                          src={URL.createObjectURL(image)}
+                          alt={image.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeImage(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-1">
+                          <p className="text-xs truncate">{image.name}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {eventImages.length === 0 && (
+                <div className="text-center py-8 border-2 border-dashed rounded-lg border-muted-foreground/25">
+                  <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Nenhuma imagem adicionada ainda
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 justify-end pt-4 border-t">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={!isFormValid} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Criar Evento
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Nested Image Upload Modal */}
+      <FileUploadModal
+        open={showImageUpload}
+        onOpenChange={setShowImageUpload}
+        onUpload={(files) => {
+          onEventImagesChange([...eventImages, ...files]);
+          setShowImageUpload(false);
+        }}
+        title="Adicionar Imagens ao Evento"
+        uploadButtonText="Adicionar"
+        config={{
+          accept: "image/*",
+          maxSize: 10 * 1024 * 1024, // 10MB
+          multiple: true,
+          fileCategory: "image",
+        }}
+      />
+    </>
   );
 };
 
