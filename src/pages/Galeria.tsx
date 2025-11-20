@@ -53,7 +53,7 @@ const Galeria = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch galery events for "Eventos recentes" section
+      // Fetch galery events for "Eventos" section
       const galeryEvents = await api.listGaleryEvents();
 
       // Transform galery events to display format
@@ -82,9 +82,9 @@ const Galeria = () => {
         }))
       );
 
-      // Also fetch individual images from the general gallery
+      // Also fetch all individual images from the backend
       try {
-        const galleryImages = await api.getImagesByGallerySlug('galeria-geral');
+        const galleryImages = await api.listAllImages();
 
         // Transform gallery images to photo format
         const transformedGalleryImages = galleryImages.map(img => ({
@@ -92,7 +92,7 @@ const Galeria = () => {
           url: img.object_url,
           caption: img.name,
           uploadedAt: img.created_at,
-          eventName: img.text || 'Galeria Geral',
+          eventName: img.text || img.slug || 'Galeria Geral',
           eventDate: img.date || img.created_at,
           eventLocation: img.location,
         }));
@@ -118,11 +118,11 @@ const Galeria = () => {
     }
   };
 
-  // Refresh only the galeria-geral images (optimized for individual image uploads)
+  // Refresh all images (optimized for individual image uploads)
   const refreshGalleryImages = async () => {
     try {
-      // Fetch only the gallery images with slug "galeria-geral"
-      const galleryImages = await api.getImagesByGallerySlug('galeria-geral');
+      // Fetch all individual images from the backend
+      const galleryImages = await api.listAllImages();
 
       // Transform gallery images to photo format
       const transformedGalleryImages = galleryImages.map(img => ({
@@ -130,7 +130,7 @@ const Galeria = () => {
         url: img.object_url,
         caption: img.name,
         uploadedAt: img.created_at,
-        eventName: img.text || 'Galeria Geral',
+        eventName: img.text || img.slug || 'Galeria Geral',
         eventDate: img.date || img.created_at,
         eventLocation: img.location,
       }));
@@ -280,7 +280,7 @@ const Galeria = () => {
         {/* Events Section */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Eventos recentes</h2>
+            <h2 className="text-3xl font-bold text-foreground">Eventos</h2>
             <ShowWhenAuthenticated>
               <Button onClick={() => setShowCreateEvent(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -387,24 +387,13 @@ const Galeria = () => {
           </div>
 
           {allPhotos.length === 0 ? (
-            <div className="text-center py-16 bg-muted rounded-lg">
-              <ImageIcon className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">Ainda não temos fotos</h3>
-              <p className="text-muted-foreground mb-4">
-                Seja o primeiro a compartilhar fotos de nossos eventos!
-              </p>
-              <ShowWhenAuthenticated>
-                <Button onClick={() => setShowCreateEvent(true)}>
-                  Criar Primeiro Evento
-                </Button>
-              </ShowWhenAuthenticated>
-            </div>
+            <p className="text-center text-muted-foreground py-8">Nenhuma imagem adicionada ainda</p>
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {allPhotos.map((photo) => (
                 <div
                   key={photo.id}
-                  className="aspect-square bg-muted rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden group"
+                  className="relative aspect-square bg-muted rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden group"
                   onClick={() => setSelectedPhoto(photo)}
                 >
                   <img
@@ -436,16 +425,7 @@ const Galeria = () => {
           <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle className="flex items-center justify-between">
-                  <span>{selectedPhoto.caption}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedPhoto(null)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </DialogTitle>
+                <DialogTitle>{selectedPhoto.caption}</DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4">
