@@ -202,7 +202,7 @@ func TestImages_GetByGallerySlug(t *testing.T) {
 	}()
 
 	// Get images by gallery slug
-	resp := MakeRequest(t, "GET", "/images/gallery/"+gallerySlug, nil)
+	resp := MakeRequest(t, "GET", "/images/slug/"+gallerySlug, nil)
 	AssertStatusCode(t, resp, http.StatusOK)
 
 	var galleryImages []ImageResponse

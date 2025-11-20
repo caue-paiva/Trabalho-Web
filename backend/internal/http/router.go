@@ -51,7 +51,7 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	// Images routes
 	mux.HandleFunc("GET /api/v1/images", imagesHandler.ListImages)
 	mux.HandleFunc("GET /api/v1/images/{id}", imagesHandler.GetImageByID)
-	mux.HandleFunc("GET /api/v1/images/gallery/{slug}", imagesHandler.GetImagesBySlug)
+	mux.HandleFunc("GET /api/v1/images/slug/{slug}", imagesHandler.GetImagesBySlug)
 	mux.HandleFunc("POST /api/v1/images",
 		middleware.NewAuthMiddlewareFunc(imagesHandler.CreateImage, opts.AuthConfig, opts.Logger),
 	)
