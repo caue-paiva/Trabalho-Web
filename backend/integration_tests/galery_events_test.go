@@ -60,9 +60,11 @@ func TestGaleryEvents_CreateAndGet(t *testing.T) {
 		assert.NotEmpty(t, url, "Image URL %d should not be empty", i)
 	}
 
-	// Note: GaleryEvents don't have a DELETE endpoint yet
-	// Images are stored in GCS with unique keys, so they won't conflict with future tests
-	// In production, you might want to implement a cleanup endpoint or background job
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
 
 	// Get by ID
 	resp = MakeRequest(t, "GET", "/galery_events/"+created.ID, nil)
@@ -115,6 +117,14 @@ func TestGaleryEvents_List(t *testing.T) {
 		// Small delay to ensure distinct creation timestamps
 		time.Sleep(100 * time.Millisecond)
 	}
+
+	// Cleanup
+	defer func() {
+		for _, id := range createdIDs {
+			resp := MakeRequest(t, "DELETE", "/galery_events/"+id, nil)
+			resp.Body.Close()
+		}
+	}()
 
 	// List all galery events
 	resp := MakeRequest(t, "GET", "/galery_events", nil)
@@ -258,6 +268,12 @@ func TestGaleryEvents_ImageURLsAccessible(t *testing.T) {
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
 
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
+
 	// Verify all image URLs are accessible
 	for i, imageURL := range created.ImageURLs {
 		assert.NotEmpty(t, imageURL, "Image URL %d should not be empty", i)
@@ -287,6 +303,12 @@ func TestGaleryEvents_SingleImage(t *testing.T) {
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
 
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
+
 	assert.Len(t, created.ImageURLs, 1, "Should have exactly 1 image URL")
 	assert.NotEmpty(t, created.ImageURLs[0], "Single image URL should not be empty")
 }
@@ -310,6 +332,12 @@ func TestGaleryEvents_ManyImages(t *testing.T) {
 
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
+
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
 
 	assert.Len(t, created.ImageURLs, 10, "Should have exactly 10 image URLs")
 
@@ -357,6 +385,12 @@ func TestGaleryEvents_MultipleImagesTransaction(t *testing.T) {
 
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
+
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
 
 	// Verify all 5 images were uploaded
 	assert.Len(t, created.ImageURLs, 5, "Should have exactly 5 image URLs")
@@ -427,6 +461,12 @@ func TestGaleryEvents_LargeNumberOfImages(t *testing.T) {
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
 
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
+
 	assert.Len(t, created.ImageURLs, numImages, "Should have all %d image URLs", numImages)
 
 	// Verify all URLs are accessible (sample check first 3)
@@ -453,7 +493,58 @@ func TestGaleryEvents_SpecialCharactersInFields(t *testing.T) {
 	var created GaleryEventResponse
 	ParseJSONResponse(t, resp, &created)
 
+	// Cleanup
+	defer func() {
+		resp := MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+		resp.Body.Close()
+	}()
+
 	// Verify special characters are preserved
 	assert.Equal(t, createReq.Name, created.Name, "Name with special chars should be preserved")
 	assert.Equal(t, createReq.Location, created.Location, "Location with special chars should be preserved")
+}
+
+func TestGaleryEvents_Delete(t *testing.T) {
+	// Create a galery event
+	createReq := CreateGaleryEventRequest{
+		Name:         "Event to Delete",
+		Location:     "Test Location",
+		Date:         time.Now().Format(time.RFC3339),
+		ImagesBase64: []string{TinyPNG},
+	}
+
+	resp := MakeRequest(t, "POST", "/galery_events", createReq)
+	require.Equal(t, http.StatusCreated, resp.StatusCode)
+
+	var created GaleryEventResponse
+	ParseJSONResponse(t, resp, &created)
+
+	// Store image URLs to verify they remain accessible after deletion
+	imageURLs := created.ImageURLs
+
+	// Delete the galery event
+	resp = MakeRequest(t, "DELETE", "/galery_events/"+created.ID, nil)
+	AssertStatusCode(t, resp, http.StatusNoContent)
+	resp.Body.Close()
+
+	// Verify the galery event is deleted
+	resp = MakeRequest(t, "GET", "/galery_events/"+created.ID, nil)
+	AssertStatusCode(t, resp, http.StatusNotFound)
+	resp.Body.Close()
+
+	// Verify images are NOT deleted (they should still be accessible)
+	for i, imageURL := range imageURLs {
+		objectResp, err := http.Head(imageURL)
+		require.NoError(t, err, "Image URL %d should still be accessible after event deletion", i)
+		defer objectResp.Body.Close()
+		assert.Equal(t, http.StatusOK, objectResp.StatusCode,
+			"Image URL %d should remain accessible after event deletion", i)
+	}
+}
+
+func TestGaleryEvents_Delete_NotFound(t *testing.T) {
+	// Try to delete non-existent galery event
+	resp := MakeRequest(t, "DELETE", "/galery_events/non-existent-id-12345", nil)
+	AssertStatusCode(t, resp, http.StatusNotFound)
+	resp.Body.Close()
 }

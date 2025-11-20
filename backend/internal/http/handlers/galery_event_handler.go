@@ -77,3 +77,16 @@ func (h *BaseHandler) ListGaleryEvents(w http.ResponseWriter, r *http.Request) {
 	response := mapper.GaleryEventsToResponse(events)
 	httputil.JSON(w, response, http.StatusOK)
 }
+
+// DeleteGaleryEvent handles DELETE /api/v1/galery_events/{id}
+// Note: This deletes only the database record, not the associated images
+func (h *BaseHandler) DeleteGaleryEvent(w http.ResponseWriter, r *http.Request) {
+	id := extractPathParam(r, "id")
+
+	if err := h.server.DeleteGaleryEvent(r.Context(), id); err != nil {
+		httputil.ErrorFromDomain(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

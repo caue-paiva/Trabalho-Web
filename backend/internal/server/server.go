@@ -41,6 +41,7 @@ type Server interface {
 	CreateGaleryEvent(ctx context.Context, name, location string, date time.Time, imagesBase64 []string) (entities.GaleryEvent, error)
 	GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error)
 	ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error)
+	DeleteGaleryEvent(ctx context.Context, id string) error
 }
 
 // server implements the Server interface

@@ -84,6 +84,9 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	mux.HandleFunc("POST /api/v1/galery_events",
 		middleware.NewAuthMiddlewareFunc(galeryEventHandler.CreateGaleryEvent, opts.AuthConfig, opts.Logger),
 	)
+	mux.HandleFunc("DELETE /api/v1/galery_events/{id}",
+		middleware.NewAuthMiddlewareFunc(galeryEventHandler.DeleteGaleryEvent, opts.AuthConfig, opts.Logger),
+	)
 
 	// Authorization check endpoint (always requires authentication)
 	mux.HandleFunc("GET /authorized",

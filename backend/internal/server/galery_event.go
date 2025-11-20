@@ -99,3 +99,9 @@ func (s *server) GetGaleryEventByID(ctx context.Context, id string) (entities.Ga
 func (s *server) ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error) {
 	return s.db.ListGaleryEvents(ctx)
 }
+
+// DeleteGaleryEvent deletes a galery event by ID
+// Note: This does NOT delete the associated images from object storage
+func (s *server) DeleteGaleryEvent(ctx context.Context, id string) error {
+	return s.db.DeleteGaleryEvent(ctx, id)
+}

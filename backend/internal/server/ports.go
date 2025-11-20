@@ -37,6 +37,7 @@ type DBPort interface {
 	CreateGaleryEvent(ctx context.Context, event entities.GaleryEvent) (entities.GaleryEvent, error)
 	GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error)
 	ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error)
+	DeleteGaleryEvent(ctx context.Context, id string) error
 }
 
 // ObjectStorePort defines the contract for object storage operations

@@ -463,6 +463,14 @@ func (r *DBRepository) ListGaleryEvents(ctx context.Context) ([]entities.GaleryE
 	return r.galeryEventsFromIterator(iter)
 }
 
+func (r *DBRepository) DeleteGaleryEvent(ctx context.Context, id string) error {
+	docRef := r.client.Collection(r.collections.GaleryEvents).Doc(id)
+	if _, err := docRef.Delete(ctx); err != nil {
+		return fmt.Errorf("error deleting galery event: %w", err)
+	}
+	return nil
+}
+
 func (r *DBRepository) galeryEventsFromIterator(iter *firestore.DocumentIterator) ([]entities.GaleryEvent, error) {
 	var events []entities.GaleryEvent
 	for {
