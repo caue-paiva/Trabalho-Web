@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Users, Image as ImageIcon, ImagePlus, Plus, X } from "lucide-react";
+import { Calendar, MapPin, Users, Image as ImageIcon, ImagePlus, Plus, X, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
 import { FileUploadModal } from "@/components/FileUploadModal";
 import * as api from "@/services/api";
@@ -35,6 +36,8 @@ const Galeria = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [newEventData, setNewEventData] = useState({
     name: "",
     date: "",
@@ -63,7 +66,8 @@ const Galeria = () => {
         date: event.date,
         location: event.location,
         photos: event.image_urls.map((url, index) => ({
-          id: `${event.id}-${index}`,
+          // Use real Firestore ID if available, otherwise fall back to composite ID for old events
+          id: event.image_ids?.[index] || `${event.id}-${index}`,
           url,
           caption: `${event.name} - Foto ${index + 1}`,
           uploadedAt: event.created_at,
@@ -197,6 +201,35 @@ const Galeria = () => {
     }
   };
 
+  const handleDeleteImage = async () => {
+    if (!selectedPhoto) return;
+
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+
+      await api.deleteImage(selectedPhoto.id);
+
+      // Close modal
+      setSelectedPhoto(null);
+
+      // Refresh the gallery to remove the deleted image
+      await fetchGalleryData();
+    } catch (err) {
+      console.error('Failed to delete image:', err);
+      setDeleteError('Falha ao excluir a imagem. Tente novamente.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Check if a photo can be deleted (has a real Firestore ID, not a composite ID)
+  const canDeletePhoto = (photoId: string): boolean => {
+    // Composite IDs have format: {eventId}-{index}, e.g., "abc123-0"
+    // Real Firestore IDs don't have this pattern (they're alphanumeric without dashes at the end)
+    return !/.*-\d+$/.test(photoId);
+  };
+
   const handleCreateEvent = async () => {
     try {
       console.log('Creating event with data:', {
@@ -327,9 +360,9 @@ const Galeria = () => {
                   <CardContent>
                     {event.photos.length > 0 ? (
                       <div className="grid grid-cols-3 gap-2">
-                        {event.photos.slice(0, 6).map((photo) => (
+                        {event.photos.slice(0, 6).map((photo, index) => (
                           <div
-                            key={photo.id}
+                            key={`${event.id}-photo-${index}`}
                             className="aspect-square bg-muted rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
                             onClick={() => setSelectedPhoto({
                               ...photo,
@@ -428,6 +461,13 @@ const Galeria = () => {
                 <DialogTitle>{selectedPhoto.caption}</DialogTitle>
               </DialogHeader>
 
+              {deleteError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{deleteError}</AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-4">
                 <div className="aspect-video bg-muted rounded-lg overflow-hidden">
                   <img
@@ -468,6 +508,23 @@ const Galeria = () => {
                   </div>
                 )}
               </div>
+
+              {/* Only show delete button for images with real Firestore IDs */}
+              {canDeletePhoto(selectedPhoto.id) && (
+                <ShowWhenAuthenticated>
+                  <DialogFooter>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteImage}
+                      disabled={isDeleting}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {isDeleting ? 'Excluindo...' : 'Excluir Imagem'}
+                    </Button>
+                  </DialogFooter>
+                </ShowWhenAuthenticated>
+              )}
             </DialogContent>
           </Dialog>
         )}

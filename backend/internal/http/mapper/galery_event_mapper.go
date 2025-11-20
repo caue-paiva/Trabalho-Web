@@ -23,6 +23,7 @@ type GaleryEventResponse struct {
 	Location  string    `json:"location"`
 	Date      time.Time `json:"date"`
 	ImageURLs []string  `json:"image_urls"`
+	ImageIDs  []string  `json:"image_ids"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -37,6 +38,7 @@ func GaleryEventToResponse(event entities.GaleryEvent) GaleryEventResponse {
 		Location:  event.Location,
 		Date:      event.Date,
 		ImageURLs: event.ImageURLs,
+		ImageIDs:  event.ImageIDs,
 		CreatedAt: event.CreatedAt,
 		UpdatedAt: event.UpdatedAt,
 	}

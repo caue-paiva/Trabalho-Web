@@ -31,6 +31,37 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
     throw error;
   }
 }
+/**
+ * Base fetch wrapper for requests that do not expect a JSON body
+ * - good for DELETE, POST/PUT that only return 204, etc.
+ */
+async function apiFetchNoJSON(
+  endpoint: string,
+  options?: RequestInit
+): Promise<void> {
+  const url = `${API_URL}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error (${response.status}): ${errorText}`);
+    }
+
+    // Nothing to return - just resolve
+    return;
+  } catch (error) {
+    console.error(`API request failed: ${endpoint}`, error);
+    throw error;
+  }
+}
 
 // ==================
 // IMAGE API
@@ -110,7 +141,7 @@ export async function updateImage(id: string, request: UpdateImageRequest): Prom
  * Delete image
  */
 export async function deleteImage(id: string): Promise<void> {
-  await apiFetch<void>(`/images/${id}`, {
+  await apiFetchNoJSON(`/images/${id}`, {
     method: 'DELETE',
   });
 }
@@ -125,6 +156,7 @@ export interface GaleryEvent {
   location: string;
   date: string; // ISO 8601 date string
   image_urls: string[];
+  image_ids: string[];
   created_at: string;
   updated_at: string;
 }
@@ -226,7 +258,7 @@ export async function updateTimelineEntry(id: string, request: UpdateTimelineEnt
  * Delete timeline entry
  */
 export async function deleteTimelineEntry(id: string): Promise<void> {
-  await apiFetch<void>(`/timelineentries/${id}`, {
+  await apiFetchNoJSON(`/timelineentries/${id}`, {
     method: 'DELETE',
   });
 }
@@ -310,7 +342,7 @@ export async function updateText(id: string, request: UpdateTextRequest): Promis
  * Delete text
  */
 export async function deleteText(id: string): Promise<void> {
-  await apiFetch<void>(`/texts/${id}`, {
+  await apiFetchNoJSON(`/texts/${id}`, {
     method: 'DELETE',
   });
 }

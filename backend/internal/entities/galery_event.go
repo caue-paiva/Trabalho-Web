@@ -9,6 +9,7 @@ type GaleryEvent struct {
 	Location  string    `firestore:"location"`
 	Date      time.Time `firestore:"date"`
 	ImageURLs []string  `firestore:"image_urls"` // URLs from object storage
+	ImageIDs  []string  `firestore:"image_ids"`  // Firestore IDs of associated Image documents
 	CreatedAt time.Time `firestore:"created_at"`
 	UpdatedAt time.Time `firestore:"updated_at"`
 }

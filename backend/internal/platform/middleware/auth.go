@@ -32,7 +32,7 @@ func NewAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Reques
 			// log token extraction and enforce it
 			idToken, err := getIdToken(r)
 			if err != nil {
-				logTokenNotFound(logger, r, err)
+				//(logger, r, err)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -54,7 +54,7 @@ func NewAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.Reques
 			// log token extraction but do not enforce it
 			idToken, err := getIdToken(r)
 			if err != nil {
-				logTokenNotFound(logger, r, err)
+				//logTokenNotFound(logger, r, err)
 			} else {
 				logTokenFound(logger, r, idToken)
 			}
@@ -79,7 +79,7 @@ func NewForceAuthMiddlewareFunc(nextHandle func(w http.ResponseWriter, r *http.R
 		// log token extraction and enforce it
 		idToken, err := getIdToken(r)
 		if err != nil {
-			logTokenNotFound(logger, r, err)
+			//(logger, r, err)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
