@@ -12,6 +12,8 @@ import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
 import { FileUploadModal } from "@/components/FileUploadModal";
 import * as api from "@/services/api";
 
+const GallerySlug = "gallery_mais_fotos"
+
 interface Photo {
   id: string;
   url: string;
@@ -88,7 +90,7 @@ const Galeria = () => {
 
       // Also fetch all individual images from the backend
       try {
-        const galleryImages = await api.listAllImages();
+        const galleryImages = await api.getImagesBySlug(GallerySlug);
 
         // Transform gallery images to photo format
         const transformedGalleryImages = galleryImages.map(img => ({
@@ -126,7 +128,7 @@ const Galeria = () => {
   const refreshGalleryImages = async () => {
     try {
       // Fetch all individual images from the backend
-      const galleryImages = await api.listAllImages();
+      const galleryImages = await api.getImagesBySlug(GallerySlug);
 
       // Transform gallery images to photo format
       const transformedGalleryImages = galleryImages.map(img => ({
@@ -180,7 +182,7 @@ const Galeria = () => {
 
         // Create image with gallery slug "galeria-geral" (general gallery)
         return api.createImage({
-          slug: "galeria-geral",
+          slug: GallerySlug,
           name: file.name,
           text: `Imagem adicionada em ${new Date().toLocaleDateString('pt-BR')}`,
           data: base64Data,

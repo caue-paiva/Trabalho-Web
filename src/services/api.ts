@@ -113,8 +113,8 @@ export async function listAllImages(): Promise<Image[]> {
 /**
  * Get images by gallery slug
  */
-export async function getImagesByGallerySlug(slug: string): Promise<Image[]> {
-  return apiFetch<Image[]>(`/images/gallery/${slug}`);
+export async function getImagesBySlug(slug: string): Promise<Image[]> {
+  return apiFetch<Image[]>(`/images/slug/${slug}`);
 }
 
 /**
