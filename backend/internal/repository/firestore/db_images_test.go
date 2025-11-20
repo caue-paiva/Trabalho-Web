@@ -441,7 +441,7 @@ func TestDBRepository_GetImagesByGallerySlug(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			images, err := db.GetImagesByGallerySlug(ctx, tt.slug)
+			images, err := db.GetImagesBySlug(ctx, tt.slug)
 			require.NoError(t, err, "Should not return error")
 			assert.GreaterOrEqual(t, len(images), tt.expectedMinCount, "Should have expected number of images")
 

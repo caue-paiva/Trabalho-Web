@@ -78,6 +78,22 @@ func (h *BaseHandler) ListGaleryEvents(w http.ResponseWriter, r *http.Request) {
 	httputil.JSON(w, response, http.StatusOK)
 }
 
+func (h *BaseHandler) ModifyGaleryEvent(w http.ResponseWriter, r *http.Request) {
+	var req mapper.ModifyGaleryEventRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		httputil.Error(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if req.ID == "" {
+		httputil.Error(w, fmt.Errorf("Request has no GaleryEvent ID"), http.StatusBadRequest)
+		return
+	}
+
+	event := mapper.ModifyGaleryRequestToEntity(req)
+	h.server.ModifyGaleryEvent(r.Context(), req.ID, event)
+}
+
 // DeleteGaleryEvent handles DELETE /api/v1/galery_events/{id}
 // Note: This deletes only the database record, not the associated images
 func (h *BaseHandler) DeleteGaleryEvent(w http.ResponseWriter, r *http.Request) {

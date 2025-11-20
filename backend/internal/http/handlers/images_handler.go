@@ -23,10 +23,10 @@ func (h *BaseHandler) GetImageByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImagesByGallerySlug handles GET /api/v1/images/gallery/{slug}
-func (h *BaseHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Request) {
+func (h *BaseHandler) GetImagesBySlug(w http.ResponseWriter, r *http.Request) {
 	slug := extractPathParam(r, "slug")
 
-	images, err := h.server.GetImagesByGallerySlug(r.Context(), slug)
+	images, err := h.server.GetImagesBySlug(r.Context(), slug)
 	if err != nil {
 		httputil.ErrorFromDomain(w, err)
 		return

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"backend/internal/entities"
+
 	"github.com/google/uuid"
 )
 
@@ -31,13 +32,8 @@ func (s *server) CreateGaleryEvent(ctx context.Context, name, location string, d
 		return entities.GaleryEvent{}, fmt.Errorf("at least one image is required")
 	}
 
-	// Generate a unique event ID for linking images
-	eventUUID := uuid.New().String()
-	eventSlug := fmt.Sprintf("galery-event-%s", eventUUID)
-
 	// Upload all images to object storage and create image documents
 	imageURLs := make([]string, 0, len(imagesBase64))
-	uploadedKeys := make([]string, 0, len(imagesBase64))     // Track uploaded keys for rollback
 	createdImageIDs := make([]string, 0, len(imagesBase64)) // Track created image IDs for rollback
 
 	for i, base64Image := range imagesBase64 {
@@ -45,41 +41,29 @@ func (s *server) CreateGaleryEvent(ctx context.Context, name, location string, d
 		imageData, err := base64.StdEncoding.DecodeString(base64Image)
 		if err != nil {
 			// Rollback: delete all previously uploaded images and image documents
-			s.rollbackGaleryEventCreation(ctx, uploadedKeys, createdImageIDs)
+			s.rollbackGaleryEventCreation(ctx, createdImageIDs)
 			return entities.GaleryEvent{}, fmt.Errorf("failed to decode image %d: %w", i, err)
 		}
 
 		// Generate unique key for image in object storage
-		imageKey := fmt.Sprintf("galery_events/%s/%s_%d", eventUUID, time.Now().Format("20060102"), i)
-
-		// Upload to object storage
-		publicURL, err := s.obj.PutObject(ctx, imageKey, imageData)
-		if err != nil {
-			// Rollback: delete all previously uploaded images and image documents
-			s.rollbackGaleryEventCreation(ctx, uploadedKeys, createdImageIDs)
-			return entities.GaleryEvent{}, fmt.Errorf("failed to upload image %d: %w", i, err)
-		}
-
-		uploadedKeys = append(uploadedKeys, imageKey)
-		imageURLs = append(imageURLs, publicURL)
-
+		imageSlug := fmt.Sprintf("galery_events/%s/%s_%d", uuid.New().String(), time.Now().Format("20060102"), i)
 		// Create an Image document in Firestore for this photo
 		imageMeta := entities.Image{
-			Slug:      eventSlug,
-			ObjectURL: publicURL,
-			Name:      fmt.Sprintf("%s - Foto %d", name, i+1),
-			Text:      fmt.Sprintf("Imagem do evento: %s", name),
-			Date:      date,
-			Location:  location,
+			Slug:     imageSlug,
+			Name:     fmt.Sprintf("%s - Foto %d", name, i+1),
+			Text:     fmt.Sprintf("Imagem do evento: %s", name),
+			Date:     date,
+			Location: location,
 		}
 
-		createdImage, err := s.db.CreateImageMeta(ctx, imageMeta)
+		createdImage, err := s.UploadImage(ctx, imageMeta, imageData)
 		if err != nil {
 			// Rollback: delete all previously uploaded images and image documents
-			s.rollbackGaleryEventCreation(ctx, uploadedKeys, createdImageIDs)
+			s.rollbackGaleryEventCreation(ctx, createdImageIDs)
 			return entities.GaleryEvent{}, fmt.Errorf("failed to create image document %d: %w", i, err)
 		}
 
+		imageURLs = append(imageURLs, createdImage.ObjectURL)
 		createdImageIDs = append(createdImageIDs, createdImage.ID)
 	}
 
@@ -96,30 +80,15 @@ func (s *server) CreateGaleryEvent(ctx context.Context, name, location string, d
 	savedEvent, err := s.db.CreateGaleryEvent(ctx, galeryEvent)
 	if err != nil {
 		// Rollback: delete all uploaded images and image documents
-		s.rollbackGaleryEventCreation(ctx, uploadedKeys, createdImageIDs)
+		s.rollbackGaleryEventCreation(ctx, createdImageIDs)
 		return entities.GaleryEvent{}, fmt.Errorf("failed to save galery event to database: %w", err)
 	}
 
 	return savedEvent, nil
 }
 
-// rollbackImageUploads deletes uploaded images in case of failure
-func (s *server) rollbackImageUploads(ctx context.Context, keys []string) {
-	for _, key := range keys {
-		// Best effort deletion - log errors but don't fail
-		if err := s.obj.DeleteObject(ctx, key); err != nil {
-			// In production, you might want to log this error
-			// For now, we silently continue
-			_ = err
-		}
-	}
-}
-
 // rollbackGaleryEventCreation deletes uploaded images and image documents in case of failure
-func (s *server) rollbackGaleryEventCreation(ctx context.Context, keys []string, imageIDs []string) {
-	// Delete uploaded images from object storage
-	s.rollbackImageUploads(ctx, keys)
-
+func (s *server) rollbackGaleryEventCreation(ctx context.Context, imageIDs []string) {
 	// Delete created image documents from Firestore
 	for _, imageID := range imageIDs {
 		// Best effort deletion - log errors but don't fail
@@ -145,4 +114,8 @@ func (s *server) ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, 
 // Note: This does NOT delete the associated images from object storage
 func (s *server) DeleteGaleryEvent(ctx context.Context, id string) error {
 	return s.db.DeleteGaleryEvent(ctx, id)
+}
+
+func (s *server) ModifyGaleryEvent(ctx context.Context, id string, newEvent entities.GaleryEvent) (entities.GaleryEvent, error) {
+	return s.db.ModifyGaleryEvent(ctx, id, newEvent)
 }

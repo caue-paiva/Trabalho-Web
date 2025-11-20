@@ -235,9 +235,9 @@ func TestGaleryEvents_Create_InvalidBase64(t *testing.T) {
 		Location: "Test Location",
 		Date:     time.Now().Format(time.RFC3339),
 		ImagesBase64: []string{
-			TinyPNG,                     // Valid
-			"not-valid-base64!@#$%",     // Invalid
-			TinyPNG,                     // Valid
+			TinyPNG,                 // Valid
+			"not-valid-base64!@#$%", // Invalid
+			TinyPNG,                 // Valid
 		},
 	}
 

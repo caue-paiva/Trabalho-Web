@@ -51,7 +51,7 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	// Images routes
 	mux.HandleFunc("GET /api/v1/images", imagesHandler.ListImages)
 	mux.HandleFunc("GET /api/v1/images/{id}", imagesHandler.GetImageByID)
-	mux.HandleFunc("GET /api/v1/images/gallery/{slug}", imagesHandler.GetImagesByGallerySlug)
+	mux.HandleFunc("GET /api/v1/images/gallery/{slug}", imagesHandler.GetImagesBySlug)
 	mux.HandleFunc("POST /api/v1/images",
 		middleware.NewAuthMiddlewareFunc(imagesHandler.CreateImage, opts.AuthConfig, opts.Logger),
 	)
@@ -83,6 +83,9 @@ func NewRouter(ctx context.Context, srv server.Server, opts RouterOptions) http.
 	mux.HandleFunc("GET /api/v1/galery_events/{id}", galeryEventHandler.GetGaleryEventByID)
 	mux.HandleFunc("POST /api/v1/galery_events",
 		middleware.NewAuthMiddlewareFunc(galeryEventHandler.CreateGaleryEvent, opts.AuthConfig, opts.Logger),
+	)
+	mux.HandleFunc("PUT /api/v1/galery_events",
+		middleware.NewAuthMiddlewareFunc(galeryEventHandler.ModifyGaleryEvent, opts.AuthConfig, opts.Logger),
 	)
 	mux.HandleFunc("DELETE /api/v1/galery_events/{id}",
 		middleware.NewAuthMiddlewareFunc(galeryEventHandler.DeleteGaleryEvent, opts.AuthConfig, opts.Logger),

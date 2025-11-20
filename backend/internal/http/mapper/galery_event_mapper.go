@@ -28,6 +28,16 @@ type GaleryEventResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+// ModifyGaleryEventRequest represents the request to create a galery event
+type ModifyGaleryEventRequest struct {
+	ID        string    `json:"id" binding:"required"`
+	Name      string    `json:"name" binding:"required"`
+	Location  string    `json:"location" binding:"required"`
+	Date      time.Time `json:"date" binding:"required"`
+	ImageURLs []string  `json:"image_urls" binding:"required"`
+	ImageIDs  []string  `json:"image_ids"  binding:"required"`
+}
+
 // Mapping functions
 
 // GaleryEventToResponse converts a GaleryEvent entity to a response DTO
@@ -51,4 +61,15 @@ func GaleryEventsToResponse(events []entities.GaleryEvent) []GaleryEventResponse
 		result[i] = GaleryEventToResponse(event)
 	}
 	return result
+}
+
+func ModifyGaleryRequestToEntity(req ModifyGaleryEventRequest) entities.GaleryEvent {
+	return entities.GaleryEvent{
+		ID:        req.ID,
+		Name:      req.Name,
+		Location:  req.Location,
+		Date:      req.Date,
+		ImageURLs: req.ImageURLs,
+		ImageIDs:  req.ImageIDs,
+	}
 }

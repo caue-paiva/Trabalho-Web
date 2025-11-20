@@ -16,9 +16,9 @@ func (s *server) GetImageByID(ctx context.Context, id string) (entities.Image, e
 	return s.db.GetImageByID(ctx, id)
 }
 
-func (s *server) GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error) {
+func (s *server) GetImagesBySlug(ctx context.Context, slug string) ([]entities.Image, error) {
 	normalized := normalizeSlug(slug)
-	return s.db.GetImagesByGallerySlug(ctx, normalized)
+	return s.db.GetImagesBySlug(ctx, normalized)
 }
 
 func (s *server) ListAllImages(ctx context.Context) ([]entities.Image, error) {

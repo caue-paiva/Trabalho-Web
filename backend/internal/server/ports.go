@@ -20,7 +20,7 @@ type DBPort interface {
 
 	// Image operations
 	GetImageByID(ctx context.Context, id string) (entities.Image, error)
-	GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error)
+	GetImagesBySlug(ctx context.Context, slug string) ([]entities.Image, error)
 	ListAllImages(ctx context.Context) ([]entities.Image, error)
 	CreateImageMeta(ctx context.Context, img entities.Image) (entities.Image, error)
 	UpdateImageMeta(ctx context.Context, id string, patch entities.Image) (entities.Image, error)
@@ -38,6 +38,7 @@ type DBPort interface {
 	GetGaleryEventByID(ctx context.Context, id string) (entities.GaleryEvent, error)
 	ListGaleryEvents(ctx context.Context) ([]entities.GaleryEvent, error)
 	DeleteGaleryEvent(ctx context.Context, id string) error
+	ModifyGaleryEvent(ctx context.Context, id string, newEvent entities.GaleryEvent) (entities.GaleryEvent, error)
 }
 
 // ObjectStorePort defines the contract for object storage operations

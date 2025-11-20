@@ -177,7 +177,7 @@ func (r *DBRepository) GetImageByID(ctx context.Context, id string) (entities.Im
 	return image, nil
 }
 
-func (r *DBRepository) GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error) {
+func (r *DBRepository) GetImagesBySlug(ctx context.Context, slug string) ([]entities.Image, error) {
 	iter := r.client.Collection(r.collections.Images).Where("slug", "==", slug).Documents(ctx)
 	return r.imagesFromIterator(iter)
 }
@@ -490,4 +490,43 @@ func (r *DBRepository) galeryEventsFromIterator(iter *firestore.DocumentIterator
 		events = append(events, event)
 	}
 	return events, nil
+}
+
+func (r *DBRepository) ModifyGaleryEvent(ctx context.Context, id string, newEvent entities.GaleryEvent) (entities.GaleryEvent, error) {
+	docRef := r.client.Collection(r.collections.GaleryEvents).Doc(id)
+
+	newEvent.UpdatedAt = time.Now()
+	// Build update map
+	updates := []firestore.Update{
+		{Path: "updatedAt", Value: newEvent.UpdatedAt},
+	}
+
+	if newEvent.Name != "" {
+		updates = append(updates, firestore.Update{Path: "name", Value: newEvent.Name})
+	}
+
+	if newEvent.Location != "" {
+		updates = append(updates, firestore.Update{Path: "location", Value: newEvent.Location})
+	}
+
+	if !newEvent.Date.IsZero() {
+		updates = append(updates, firestore.Update{Path: "date", Value: newEvent.Date})
+	}
+
+	if len(newEvent.ImageURLs) > 0 {
+		updates = append(updates, firestore.Update{Path: "image_urls", Value: newEvent.ImageURLs})
+	}
+
+	if len(newEvent.ImageIDs) > 0 {
+		updates = append(updates, firestore.Update{Path: "image_ids", Value: newEvent.ImageIDs})
+	}
+
+	if _, err := docRef.Update(ctx, updates); err != nil {
+		if status.Code(err) == codes.NotFound {
+			return entities.GaleryEvent{}, fmt.Errorf("galery Event with id %s not found: %w", id, customerrors.ErrNotFound)
+		}
+		return entities.GaleryEvent{}, fmt.Errorf("error updating Galery Event: %w", err)
+	}
+
+	return r.GetGaleryEventByID(ctx, id)
 }
