@@ -22,6 +22,7 @@ type Server interface {
 	// Image operations
 	GetImageByID(ctx context.Context, id string) (entities.Image, error)
 	GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error)
+	ListAllImages(ctx context.Context) ([]entities.Image, error)
 	UploadImage(ctx context.Context, meta entities.Image, data []byte) (entities.Image, error)
 	UpdateImage(ctx context.Context, id string, meta entities.Image, data []byte) (entities.Image, error)
 	DeleteImage(ctx context.Context, id string) error

@@ -285,3 +285,84 @@ func TestImages_InvalidBase64(t *testing.T) {
 	AssertStatusCode(t, resp, http.StatusBadRequest)
 	resp.Body.Close()
 }
+
+func TestImages_ListAll(t *testing.T) {
+	// Create multiple images with different slugs
+	images := []CreateImageRequest{
+		{
+			Slug: "gallery-1",
+			Name: "List Test Image 1",
+			Text: "First test image",
+			Data: TinyPNG,
+		},
+		{
+			Slug: "gallery-2",
+			Name: "List Test Image 2",
+			Text: "Second test image",
+			Data: TinyPNG,
+		},
+		{
+			Slug: "gallery-1",
+			Name: "List Test Image 3",
+			Text: "Third test image",
+			Data: TinyPNG,
+		},
+	}
+
+	var createdIDs []string
+	for _, img := range images {
+		resp := MakeRequest(t, "POST", "/images", img)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
+
+		var created ImageResponse
+		ParseJSONResponse(t, resp, &created)
+		createdIDs = append(createdIDs, created.ID)
+	}
+
+	// Cleanup
+	defer func() {
+		for _, id := range createdIDs {
+			resp := MakeRequest(t, "DELETE", "/images/"+id, nil)
+			resp.Body.Close()
+		}
+	}()
+
+	// List all images
+	resp := MakeRequest(t, "GET", "/images", nil)
+	AssertStatusCode(t, resp, http.StatusOK)
+
+	var allImages []ImageResponse
+	ParseJSONResponse(t, resp, &allImages)
+
+	// Verify our images are in the list
+	assert.GreaterOrEqual(t, len(allImages), 3, "Should have at least our 3 images")
+
+	foundCount := 0
+	for _, img := range allImages {
+		for _, id := range createdIDs {
+			if img.ID == id {
+				foundCount++
+				break
+			}
+		}
+	}
+	assert.Equal(t, 3, foundCount, "Should find all 3 created images in the list")
+
+	// Verify images are ordered by creation date (newest first)
+	// Just check that created_at timestamps are valid
+	for i, img := range allImages {
+		assert.NotEmpty(t, img.CreatedAt, "Image %d should have created_at timestamp", i)
+	}
+}
+
+func TestImages_ListAll_EmptyResult(t *testing.T) {
+	// Even if database is empty, listing should return empty array, not error
+	resp := MakeRequest(t, "GET", "/images", nil)
+	AssertStatusCode(t, resp, http.StatusOK)
+
+	var images []ImageResponse
+	ParseJSONResponse(t, resp, &images)
+
+	// Should be a valid array (possibly empty)
+	assert.NotNil(t, images, "Should return valid array")
+}

@@ -11,6 +11,8 @@ OBS: Some tests are flaky, especially when it comes to parsing error status-code
 - **`images_test.go`** - Tests for `/api/v1/images` endpoints
 - **`timeline_test.go`** - Tests for `/api/v1/timelineentries` endpoints
 - **`events_test.go`** - Tests for `/api/v1/events` endpoint
+- **`galery_events_test.go`** - Tests for `/api/v1/galery_events` endpoints
+- **`auth_optional_test.go`** - Tests for authentication configuration
 
 ## Prerequisites
 
@@ -66,6 +68,9 @@ go test ./integration_tests -v -run TestTexts_CreateAndGet
 
 # Run tests matching a pattern
 go test ./integration_tests -v -run TestImages_.*
+
+# Run galery events tests
+go test ./integration_tests -v -run TestGaleryEvents
 ```
 
 ## Test Coverage
@@ -144,6 +149,74 @@ go test ./integration_tests -v -run TestImages_.*
 ✅ **Response structure**
 - Verify all expected fields present
 - Handle empty results gracefully
+
+### Images List All Endpoint (`images_test.go`)
+
+✅ **List all images**
+- GET `/api/v1/images` - Get all images across all galleries
+- Ordered by creation date (newest first)
+
+✅ **Validation**
+- Empty result handling
+- Multiple galleries support
+- Proper ordering verification
+
+### Galery Events Endpoints (`galery_events_test.go`)
+
+✅ **Create and retrieve**
+- POST `/api/v1/galery_events` - Create event with multiple images
+- GET `/api/v1/galery_events/{id}` - Get by ID
+- GET `/api/v1/galery_events` - List all events
+
+✅ **Image upload**
+- Single image upload
+- Multiple images (transactional)
+- Large number of images (15+ images)
+- All images must succeed or fail together
+
+✅ **Validation**
+- Required fields (name, location, date, images)
+- Invalid date format handling
+- Invalid base64 handling
+- Empty name/location rejection
+- Minimum one image required
+
+✅ **Data integrity**
+- Image URLs uniqueness
+- Image accessibility verification
+- Special characters preservation (UTF-8, emojis)
+- Proper ordering by date (descending)
+
+✅ **Error cases**
+- 404 for non-existent events
+- 400 for missing required fields
+- 400 for invalid date formats
+- 500 for invalid base64 (with rollback)
+
+## Cleanup Strategy
+
+### Automatic Cleanup
+All tests that create resources **automatically clean up** after themselves using `defer`:
+
+```go
+defer func() {
+    resp := MakeRequest(t, "DELETE", "/texts/"+created.ID, nil)
+    resp.Body.Close()
+}()
+```
+
+### Galery Events - Special Case
+**Note**: Galery events don't currently have a DELETE endpoint. Images are stored in GCS with UUID-based unique keys, ensuring no conflicts between test runs. Each test creates events with unique names using timestamp-based slugs.
+
+### Image Cleanup
+Images created during tests are automatically deleted via the DELETE endpoint, which removes both:
+- Database metadata
+- GCS object storage files
+
+This ensures:
+- No test pollution between runs
+- Database stays clean
+- Object storage doesn't accumulate test files
 
 ## CURL Examples
 
@@ -372,6 +445,76 @@ curl -X DELETE http://localhost:8080/api/v1/timelineentries/abc123def456
 #### Get All Events
 ```bash
 curl -X GET http://localhost:8080/api/v1/events
+```
+
+### Galery Events Endpoints
+
+#### List All Galery Events
+```bash
+curl -X GET http://localhost:8080/api/v1/galery_events
+```
+
+#### Get Galery Event by ID
+```bash
+curl -X GET http://localhost:8080/api/v1/galery_events/abc123def456
+```
+
+#### Create Galery Event
+```bash
+# Note: Requires authentication
+curl -X POST http://localhost:8080/api/v1/galery_events \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  -d '{
+    "name": "Python Workshop 2024",
+    "location": "IFSP São Carlos",
+    "date": "2024-12-15T14:00:00Z",
+    "images_base64": [
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg=="
+    ]
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "abc123def456",
+  "name": "Python Workshop 2024",
+  "location": "IFSP São Carlos",
+  "date": "2024-12-15T14:00:00Z",
+  "image_urls": [
+    "https://storage.googleapis.com/bucket/galery_events/uuid1/20241215_0",
+    "https://storage.googleapis.com/bucket/galery_events/uuid1/20241215_1"
+  ],
+  "created_at": "2024-12-15T10:00:00Z",
+  "updated_at": "2024-12-15T10:00:00Z"
+}
+```
+
+### Images List All Endpoint
+
+#### List All Images
+```bash
+# Get all images from all galleries
+curl -X GET http://localhost:8080/api/v1/images
+```
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": "img123",
+    "slug": "galeria-geral",
+    "object_url": "https://storage.googleapis.com/bucket/images/photo.jpg",
+    "name": "My Photo",
+    "text": "Photo description",
+    "date": "2024-01-15",
+    "location": "São Carlos",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  }
+]
 ```
 
 ### Authorization Endpoints

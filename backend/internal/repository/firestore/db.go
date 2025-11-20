@@ -182,6 +182,11 @@ func (r *DBRepository) GetImagesByGallerySlug(ctx context.Context, slug string) 
 	return r.imagesFromIterator(iter)
 }
 
+func (r *DBRepository) ListAllImages(ctx context.Context) ([]entities.Image, error) {
+	iter := r.client.Collection(r.collections.Images).OrderBy("createdAt", firestore.Desc).Documents(ctx)
+	return r.imagesFromIterator(iter)
+}
+
 func (r *DBRepository) CreateImageMeta(ctx context.Context, img entities.Image) (entities.Image, error) {
 	// Generate new document reference
 	docRef := r.client.Collection(r.collections.Images).NewDoc()

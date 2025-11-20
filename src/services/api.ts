@@ -73,6 +73,13 @@ export async function getImageById(id: string): Promise<Image> {
 }
 
 /**
+ * List all images
+ */
+export async function listAllImages(): Promise<Image[]> {
+  return apiFetch<Image[]>('/images');
+}
+
+/**
  * Get images by gallery slug
  */
 export async function getImagesByGallerySlug(slug: string): Promise<Image[]> {

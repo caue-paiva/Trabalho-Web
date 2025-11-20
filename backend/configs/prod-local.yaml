@@ -19,4 +19,4 @@ gcs:
   project_id: sitegrupysanca
   make_public: true
   signed_url_expiry_minutes: 15
-  base_path: test/images  # Base path within bucket (e.g., "images" results in "images/photo.jpg")
+  base_path: prod/images  # Base path within bucket (e.g., "images" results in "images/photo.jpg")

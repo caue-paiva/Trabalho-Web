@@ -21,6 +21,10 @@ func (s *server) GetImagesByGallerySlug(ctx context.Context, slug string) ([]ent
 	return s.db.GetImagesByGallerySlug(ctx, normalized)
 }
 
+func (s *server) ListAllImages(ctx context.Context) ([]entities.Image, error) {
+	return s.db.ListAllImages(ctx)
+}
+
 func (s *server) UploadImage(ctx context.Context, meta entities.Image, data []byte) (entities.Image, error) {
 	// Business logic: generate object key with timestamp
 	key := generateObjectKey(meta.Slug)

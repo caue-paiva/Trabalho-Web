@@ -21,6 +21,7 @@ type DBPort interface {
 	// Image operations
 	GetImageByID(ctx context.Context, id string) (entities.Image, error)
 	GetImagesByGallerySlug(ctx context.Context, slug string) ([]entities.Image, error)
+	ListAllImages(ctx context.Context) ([]entities.Image, error)
 	CreateImageMeta(ctx context.Context, img entities.Image) (entities.Image, error)
 	UpdateImageMeta(ctx context.Context, id string, patch entities.Image) (entities.Image, error)
 	DeleteImageMeta(ctx context.Context, id string) error

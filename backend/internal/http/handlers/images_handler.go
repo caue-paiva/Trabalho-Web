@@ -36,6 +36,18 @@ func (h *BaseHandler) GetImagesByGallerySlug(w http.ResponseWriter, r *http.Requ
 	httputil.JSON(w, response, http.StatusOK)
 }
 
+// ListImages handles GET /api/v1/images
+func (h *BaseHandler) ListImages(w http.ResponseWriter, r *http.Request) {
+	images, err := h.server.ListAllImages(r.Context())
+	if err != nil {
+		httputil.ErrorFromDomain(w, err)
+		return
+	}
+
+	response := mapper.ImagesToResponse(images)
+	httputil.JSON(w, response, http.StatusOK)
+}
+
 // CreateImage handles POST /api/v1/images
 func (h *BaseHandler) CreateImage(w http.ResponseWriter, r *http.Request) {
 	var req mapper.CreateImageRequest

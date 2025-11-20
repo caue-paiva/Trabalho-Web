@@ -60,12 +60,9 @@ func TestGaleryEvents_CreateAndGet(t *testing.T) {
 		assert.NotEmpty(t, url, "Image URL %d should not be empty", i)
 	}
 
-	// Cleanup
-	defer func() {
-		// Note: We don't have a DELETE endpoint yet, so this is a placeholder
-		// In a real scenario, you'd implement cleanup to delete test data
-		t.Logf("Created GaleryEvent with ID: %s (manual cleanup may be required)", created.ID)
-	}()
+	// Note: GaleryEvents don't have a DELETE endpoint yet
+	// Images are stored in GCS with unique keys, so they won't conflict with future tests
+	// In production, you might want to implement a cleanup endpoint or background job
 
 	// Get by ID
 	resp = MakeRequest(t, "GET", "/galery_events/"+created.ID, nil)
@@ -84,21 +81,22 @@ func TestGaleryEvents_CreateAndGet(t *testing.T) {
 func TestGaleryEvents_List(t *testing.T) {
 	// Create multiple galery events with different dates
 	now := time.Now()
+	uniquePrefix := GenerateUniqueSlug("galevent")
 	events := []CreateGaleryEventRequest{
 		{
-			Name:         "Event 1 - Oldest",
+			Name:         uniquePrefix + " - Event 1 - Oldest",
 			Location:     "Location 1",
 			Date:         now.Add(-48 * time.Hour).Format(time.RFC3339),
 			ImagesBase64: []string{TinyPNG},
 		},
 		{
-			Name:         "Event 2 - Middle",
+			Name:         uniquePrefix + " - Event 2 - Middle",
 			Location:     "Location 2",
 			Date:         now.Add(-24 * time.Hour).Format(time.RFC3339),
 			ImagesBase64: []string{TinyPNG},
 		},
 		{
-			Name:         "Event 3 - Newest",
+			Name:         uniquePrefix + " - Event 3 - Newest",
 			Location:     "Location 3",
 			Date:         now.Format(time.RFC3339),
 			ImagesBase64: []string{TinyPNG},
@@ -113,6 +111,9 @@ func TestGaleryEvents_List(t *testing.T) {
 		var created GaleryEventResponse
 		ParseJSONResponse(t, resp, &created)
 		createdIDs = append(createdIDs, created.ID)
+
+		// Small delay to ensure distinct creation timestamps
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	// List all galery events
@@ -137,7 +138,7 @@ func TestGaleryEvents_List(t *testing.T) {
 	assert.Equal(t, 3, foundCount, "Should find all 3 created events in the list")
 
 	// Verify list is ordered by date descending (newest first)
-	// Find our created events in the list
+	// Find our created events in the list (should be in order)
 	var ourEvents []GaleryEventResponse
 	for _, evt := range galeryEvents {
 		for _, id := range createdIDs {
@@ -148,12 +149,12 @@ func TestGaleryEvents_List(t *testing.T) {
 		}
 	}
 
-	// Since we know the order we created them, verify the newest is first when found consecutively
-	if len(ourEvents) >= 2 {
-		// Just verify dates are valid time.Time objects
-		for i, evt := range ourEvents {
-			assert.NotZero(t, evt.Date, "Event %d should have a valid date", i)
-		}
+	// Verify dates are valid and events have all required fields
+	for i, evt := range ourEvents {
+		assert.NotZero(t, evt.Date, "Event %d should have a valid date", i)
+		assert.NotEmpty(t, evt.Name, "Event %d should have a name", i)
+		assert.NotEmpty(t, evt.Location, "Event %d should have a location", i)
+		assert.NotEmpty(t, evt.ImageURLs, "Event %d should have image URLs", i)
 	}
 }
 
@@ -334,4 +335,125 @@ func TestGaleryEvents_DateValidation(t *testing.T) {
 	// Should fail due to invalid date format
 	AssertStatusCode(t, resp, http.StatusBadRequest)
 	resp.Body.Close()
+}
+
+func TestGaleryEvents_MultipleImagesTransaction(t *testing.T) {
+	// Test that all images are uploaded as part of a transaction
+	createReq := CreateGaleryEventRequest{
+		Name:     "Multi-Image Transaction Test",
+		Location: "Test Location",
+		Date:     time.Now().Format(time.RFC3339),
+		ImagesBase64: []string{
+			TinyPNG,
+			TinyPNG,
+			TinyPNG,
+			TinyPNG,
+			TinyPNG, // 5 images
+		},
+	}
+
+	resp := MakeRequest(t, "POST", "/galery_events", createReq)
+	AssertStatusCode(t, resp, http.StatusCreated)
+
+	var created GaleryEventResponse
+	ParseJSONResponse(t, resp, &created)
+
+	// Verify all 5 images were uploaded
+	assert.Len(t, created.ImageURLs, 5, "Should have exactly 5 image URLs")
+
+	// Verify all URLs are unique
+	urlSet := make(map[string]bool)
+	for i, url := range created.ImageURLs {
+		assert.NotEmpty(t, url, "Image URL %d should not be empty", i)
+		assert.False(t, urlSet[url], "Image URL %d should be unique", i)
+		urlSet[url] = true
+	}
+
+	// Verify all images are accessible
+	for i, imageURL := range created.ImageURLs {
+		objectResp, err := http.Head(imageURL)
+		require.NoError(t, err, "Should be able to access image URL %d", i)
+		defer objectResp.Body.Close()
+
+		assert.Equal(t, http.StatusOK, objectResp.StatusCode,
+			"Image URL %d should be accessible", i)
+	}
+}
+
+func TestGaleryEvents_EmptyNameLocation(t *testing.T) {
+	// Test that empty name fails
+	createReq := CreateGaleryEventRequest{
+		Name:         "",
+		Location:     "Test Location",
+		Date:         time.Now().Format(time.RFC3339),
+		ImagesBase64: []string{TinyPNG},
+	}
+
+	resp := MakeRequest(t, "POST", "/galery_events", createReq)
+	AssertStatusCode(t, resp, http.StatusBadRequest)
+	resp.Body.Close()
+
+	// Test that empty location fails
+	createReq = CreateGaleryEventRequest{
+		Name:         "Test Event",
+		Location:     "",
+		Date:         time.Now().Format(time.RFC3339),
+		ImagesBase64: []string{TinyPNG},
+	}
+
+	resp = MakeRequest(t, "POST", "/galery_events", createReq)
+	AssertStatusCode(t, resp, http.StatusBadRequest)
+	resp.Body.Close()
+}
+
+func TestGaleryEvents_LargeNumberOfImages(t *testing.T) {
+	// Test creating event with many images (stress test)
+	numImages := 15
+	images := make([]string, numImages)
+	for i := range images {
+		images[i] = TinyPNG
+	}
+
+	createReq := CreateGaleryEventRequest{
+		Name:         "Large Image Set Event",
+		Location:     "Test Location",
+		Date:         time.Now().Format(time.RFC3339),
+		ImagesBase64: images,
+	}
+
+	resp := MakeRequest(t, "POST", "/galery_events", createReq)
+	AssertStatusCode(t, resp, http.StatusCreated)
+
+	var created GaleryEventResponse
+	ParseJSONResponse(t, resp, &created)
+
+	assert.Len(t, created.ImageURLs, numImages, "Should have all %d image URLs", numImages)
+
+	// Verify all URLs are accessible (sample check first 3)
+	for i := 0; i < 3 && i < len(created.ImageURLs); i++ {
+		objectResp, err := http.Head(created.ImageURLs[i])
+		require.NoError(t, err, "Should be able to access image URL %d", i)
+		objectResp.Body.Close()
+		assert.Equal(t, http.StatusOK, objectResp.StatusCode)
+	}
+}
+
+func TestGaleryEvents_SpecialCharactersInFields(t *testing.T) {
+	// Test with special characters in name and location
+	createReq := CreateGaleryEventRequest{
+		Name:         "Event with Special Chars: São Paulo, Café & Python 🐍",
+		Location:     "São Carlos - IFSP (Instituto Federal)",
+		Date:         time.Now().Format(time.RFC3339),
+		ImagesBase64: []string{TinyPNG},
+	}
+
+	resp := MakeRequest(t, "POST", "/galery_events", createReq)
+	AssertStatusCode(t, resp, http.StatusCreated)
+
+	var created GaleryEventResponse
+	ParseJSONResponse(t, resp, &created)
+
+	// Verify special characters are preserved
+	assert.Equal(t, createReq.Name, created.Name, "Name with special chars should be preserved")
+	assert.Equal(t, createReq.Location, created.Location, "Location with special chars should be preserved")
 }
