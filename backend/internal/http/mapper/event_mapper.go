@@ -25,6 +25,7 @@ type EventResponse struct {
 	Privacy           string    `json:"privacy,omitempty"`
 	State             string    `json:"state,omitempty"`
 	CreatedAt         time.Time `json:"created_at,omitempty"`
+	Link              string    `json:"link,omitempty"`
 }
 
 // Mapping functions
@@ -47,6 +48,7 @@ func EventToResponse(event entities.Event) EventResponse {
 		Privacy:           event.Privacy,
 		State:             event.State,
 		CreatedAt:         event.CreatedAt,
+		Link:              event.Link,
 	}
 }
 

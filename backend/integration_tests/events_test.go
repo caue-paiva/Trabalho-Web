@@ -25,6 +25,7 @@ type EventResponse struct {
 	Privacy           string `json:"privacy"`
 	State             string `json:"state"`
 	CreatedAt         string `json:"createdAt"`
+	Link              string `json:"link"`
 }
 
 func TestEvents_GetAll(t *testing.T) {
@@ -41,6 +42,7 @@ func TestEvents_GetAll(t *testing.T) {
 		event := events[0]
 		assert.NotEmpty(t, event.ID, "Event should have an ID")
 		assert.NotEmpty(t, event.Name, "Event should have a name")
+		assert.NotEmpty(t, event.Link, "Event should have a Link")
 		// Note: StartsAt and EndsAt may be empty in some events from external API
 		// We just verify the fields exist in the struct
 	}

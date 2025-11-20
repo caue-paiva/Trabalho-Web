@@ -2,8 +2,13 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	"backend/internal/entities"
+)
+
+const (
+	grupyBaseEventsWebPageURL = "https://eventos.grupysanca.com.br"
 )
 
 // =======================
@@ -16,6 +21,18 @@ func (s *server) GetEvents(ctx context.Context, limit int, orderBy string, desc 
 		limit = 10 // default
 	}
 
-	// Delegate to port 
-	return s.events.GetEvents(ctx, limit, orderBy, desc)
+	// Delegate to port
+	events, err := s.events.GetEvents(ctx, limit, orderBy, desc)
+	if err != nil {
+		return nil, err
+	}
+	addLinksToevents(events)
+	return events, nil
+}
+
+// fills the Link field of events in place
+func addLinksToevents(events []entities.Event) {
+	for i := range events {
+		events[i].Link = fmt.Sprintf("%s/e/%s", grupyBaseEventsWebPageURL, events[i].ID)
+	}
 }

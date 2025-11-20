@@ -5,7 +5,7 @@ import "time"
 // Event represents an external community event from Grupy Sanca API (proxy only, no persistence)
 type Event struct {
 	ID                string
-	Identifier        string    // Event's unique string identifier (e.g., "b8324ae2")
+	Identifier        string // Event's unique string identifier (e.g., "b8324ae2")
 	Name              string
 	Description       string
 	StartsAt          time.Time // Event start date/time
@@ -20,4 +20,5 @@ type Event struct {
 	Privacy           string // e.g., "public"
 	State             string // e.g., "draft", "published"
 	CreatedAt         time.Time
+	Link              string //link to the event on the main grupy events page
 }
