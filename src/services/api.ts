@@ -373,7 +373,7 @@ export async function deleteText(id: string): Promise<void> {
 // EVENTS API (External)
 // ==================
 
-export interface Event {
+export interface ExternalEvent {
   id: string;
   name: string;
   description?: string;
@@ -388,11 +388,11 @@ export interface Event {
 /**
  * Get events with optional query parameters
  */
-export async function getEvents(params?: {
+export async function getExternalEvents(params?: {
   limit?: number;
   orderBy?: string;
   desc?: boolean;
-}): Promise<Event[]> {
+}): Promise<ExternalEvent[]> {
   const queryParams = new URLSearchParams();
   if (params?.limit) queryParams.append('limit', params.limit.toString());
   if (params?.orderBy) queryParams.append('orderBy', params.orderBy);
@@ -401,7 +401,39 @@ export async function getEvents(params?: {
   const query = queryParams.toString();
   const endpoint = `/events${query ? `?${query}` : ''}`;
 
-  return apiFetch<Event[]>(endpoint);
+  return apiFetch<ExternalEvent[]>(endpoint);
+}
+
+export async function getLatestExternalEvent(): Promise<ExternalEvent | null> {
+  // Get events ordered by start time ascending
+  const events = await getExternalEvents({
+    orderBy: "starts_at",
+    desc: false,
+  });
+
+  if (!events.length) {
+    return null;
+  }
+
+  const now = new Date();
+
+  // Prefer the next upcoming event
+  const upcoming = events
+    .map((e) => ({ event: e, start: new Date(e.starts_at) }))
+    .filter(({ start }) => !isNaN(start.getTime()) && start >= now)
+    .sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  if (upcoming.length > 0) {
+    return upcoming[0].event;
+  }
+
+  // If there are no future events, fall back to the most recent past one
+  const latestPast = [...events]
+    .map((e) => ({ event: e, start: new Date(e.starts_at) }))
+    .filter(({ start }) => !isNaN(start.getTime()))
+    .sort((a, b) => b.start.getTime() - a.start.getTime());
+
+  return latestPast.length > 0 ? latestPast[0].event : null;
 }
 
 // ==================
