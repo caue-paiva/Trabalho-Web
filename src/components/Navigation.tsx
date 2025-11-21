@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Github, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useTheme } from "@/hooks/useTheme";
 import { TelegramIcon } from "@/components/Icon";
@@ -20,6 +19,7 @@ const Navigation = () => {
     { href: "/galeria", label: t("navigation.gallery") },
     { href: "/codigo-conduta", label: t("navigation.codeOfConduct") },
     { href: "/contato", label: t("navigation.contact") },
+    { href: "/admin", label: "Admin" },
   ];
 
   const socialLinks = [
@@ -58,7 +58,6 @@ const Navigation = () => {
 
             <div className="flex items-center space-x-2 border-l border-border pl-4">
               <ThemeToggle />
-              <LanguageToggle />
               {socialLinks.map((social) => (
                 <Button
                   key={social.label}
@@ -113,7 +112,6 @@ const Navigation = () => {
 
               <div className="flex items-center space-x-2 pt-2 border-t border-border">
                 <ThemeToggle />
-                <LanguageToggle />
                 {socialLinks.map((social) => (
                   <Button
                     key={social.label}

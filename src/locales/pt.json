@@ -167,5 +167,91 @@
     "back": "Voltar",
     "next": "Próximo",
     "previous": "Anterior"
+  },
+  "admin": {
+    "title": "Painel Admin",
+    "subtitle": "Rota protegida - autenticação necessária",
+    "logout": "Logout",
+    "mockMode": {
+      "title": "🎭 Modo de Autenticação Simulada",
+      "description": "Você está usando autenticação simulada. Todas as operações são registradas no console. Verifique o console do navegador para ver eventos de autenticação e geração de token."
+    },
+    "userInfo": {
+      "title": "Informações do Usuário",
+      "description": "Seus detalhes de autenticação atuais",
+      "email": "E-mail",
+      "displayName": "Nome de Exibição",
+      "userId": "ID do Usuário",
+      "provider": "Provedor",
+      "notAvailable": "Não disponível",
+      "notSet": "Não definido",
+      "showToken": "Mostrar Token no Console"
+    },
+    "apiTesting": {
+      "title": "Testar Requisições Autenticadas",
+      "description": "Testar o cliente HTTP com injeção automática de token",
+      "requestDescription": "Isso fará uma requisição para uma API pública (JSONPlaceholder) com seu token de autenticação automaticamente injetado no cabeçalho Authorization. Verifique o console para ver os detalhes completos da requisição e visualização do token.",
+      "testing": "Testando...",
+      "testButton": "Testar Requisição de API com Token de Autenticação",
+      "successPrefix": "✅ Sucesso! Post buscado:",
+      "failedPrefix": "❌ Falhou:"
+    },
+    "instructions": {
+      "title": "🎯 Instruções de Teste",
+      "step1": {
+        "title": "1. Verificar Console do Navegador",
+        "description": "Abra o DevTools (F12) e verifique a aba Console para ver todos os logs de autenticação e operações de token."
+      },
+      "step2": {
+        "title": "2. Testar Exibição de Token",
+        "description": "Clique em \"Mostrar Token no Console\" para ver seu token de ID do Firebase atual. Este token é automaticamente incluído em todas as requisições autenticadas."
+      },
+      "step3": {
+        "title": "3. Testar Requisição de API",
+        "description": "Clique em \"Testar Requisição de API\" para ver como o httpClient injeta automaticamente seu token nas requisições enviadas."
+      },
+      "step4": {
+        "title": "4. Testar Persistência de Sessão",
+        "description": "Atualize esta página (F5) - você deve permanecer conectado. O estado de autenticação é persistido no localStorage."
+      },
+      "step5": {
+        "title": "5. Testar Rota Protegida",
+        "description": "Clique em Sair e tente acessar /admin diretamente. Você deve ser redirecionado para a página de login."
+      }
+    },
+    "alerts": {
+      "noToken": "Nenhum token disponível. Por favor, faça login primeiro.",
+      "tokenCopied": "Token completo copiado para a área de transferência e registrado no console!\\n\\nTamanho do token: {length} caracteres\\n\\nVerifique o console do navegador (F12) para ver o token completo.",
+      "tokenLogged": "Token registrado no console!\\n\\nToken Completo:\\n{token}\\n\\nTamanho do token: {length} caracteres\\n\\nNota: Não foi possível copiar para a área de transferência automaticamente. Por favor, copie do console ou deste alerta.",
+      "tokenFailed": "Falha ao obter token. Verifique o console para detalhes.",
+      "logoutFailed": "Falha ao sair"
+    }
+  },
+  "login": {
+    "title": "Login de Admins",
+    "subtitle": "Faça login para acessar o painel de Admins",
+    "mockMode": {
+      "title": "🎭 Modo Simulado Ativo",
+      "credentials": "Use: admin@example.com / admin123 ou test@example.com / test123"
+    },
+    "email": "E-mail",
+    "emailPlaceholder": "admin@exemplo.com",
+    "password": "Senha",
+    "passwordPlaceholder": "••••••••",
+    "signInButton": "Entrar com E-mail",
+    "signingIn": "Entrando...",
+    "orContinueWith": "Ou continue com",
+    "signInWithGoogle": "Entrar com Google",
+    "errors": {
+      "invalidCredential": "E-mail ou senha inválidos. Tente novamente.",
+      "userNotFound": "Nenhuma conta encontrada com este e-mail.",
+      "wrongPassword": "Senha incorreta. Tente novamente.",
+      "tooManyRequests": "Muitas tentativas falhadas. Tente novamente mais tarde.",
+      "signInFailed": "Falha ao entrar. Tente novamente.",
+      "popupClosed": "A janela de login foi fechada. Tente novamente.",
+      "googleSignInFailed": "Falha ao entrar com Google. Tente novamente.",
+      "unexpected": "Ocorreu um erro inesperado.",
+      "unexpectedGoogle": "Ocorreu um erro inesperado com o login do Google."
+    }
   }
 }

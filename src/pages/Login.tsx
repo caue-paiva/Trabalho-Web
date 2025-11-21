@@ -17,10 +17,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FcGoogle } from 'react-icons/fc';
 import { Loader2 } from 'lucide-react';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Login = () => {
   const navigate = useNavigate();
   const { signInWithEmail, signInWithGoogle, isMockMode } = useAuth();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,18 +42,18 @@ const Login = () => {
 
       if (err instanceof Error) {
         if (err.message.includes('auth/invalid-credential')) {
-          setError('Invalid email or password. Please try again.');
+          setError(t('login.errors.invalidCredential'));
         } else if (err.message.includes('auth/user-not-found')) {
-          setError('No account found with this email.');
+          setError(t('login.errors.userNotFound'));
         } else if (err.message.includes('auth/wrong-password')) {
-          setError('Incorrect password. Please try again.');
+          setError(t('login.errors.wrongPassword'));
         } else if (err.message.includes('auth/too-many-requests')) {
-          setError('Too many failed attempts. Please try again later.');
+          setError(t('login.errors.tooManyRequests'));
         } else {
-          setError('Failed to sign in. Please try again.');
+          setError(t('login.errors.signInFailed'));
         }
       } else {
-        setError('An unexpected error occurred.');
+        setError(t('login.errors.unexpected'));
       }
     } finally {
       setLoading(false);
@@ -69,15 +71,15 @@ const Login = () => {
 
       if (err instanceof Error) {
         if (err.message.includes('auth/popup-closed-by-user')) {
-          setError('Sign-in popup was closed. Please try again.');
+          setError(t('login.errors.popupClosed'));
         } else if (err.message.includes('auth/cancelled-popup-request')) {
           // User cancelled, no need to show error
           setError(null);
         } else {
-          setError('Failed to sign in with Google. Please try again.');
+          setError(t('login.errors.googleSignInFailed'));
         }
       } else {
-        setError('An unexpected error occurred with Google sign-in.');
+        setError(t('login.errors.unexpectedGoogle'));
       }
     } finally {
       setGoogleLoading(false);
@@ -89,19 +91,17 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Admin Login
+            {t('login.title')}
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to access the admin dashboard
+            {t('login.subtitle')}
           </CardDescription>
           {isMockMode && (
             <Alert className="mt-4">
               <AlertDescription className="text-sm">
-                <strong>🎭 Mock Mode Active</strong>
+                <strong>{t('login.mockMode.title')}</strong>
                 <br />
-                Use: admin@example.com / admin123
-                <br />
-                Or: test@example.com / test123
+                {t('login.mockMode.credentials')}
               </AlertDescription>
             </Alert>
           )}
@@ -116,11 +116,11 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('login.email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -129,11 +129,11 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('login.password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -151,10 +151,10 @@ const Login = () => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t('login.signingIn')}
                 </>
               ) : (
-                'Sign in with Email'
+                t('login.signInButton')
               )}
             </Button>
 
@@ -164,7 +164,7 @@ const Login = () => {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with
+                  {t('login.orContinueWith')}
                 </span>
               </div>
             </div>
@@ -179,19 +179,15 @@ const Login = () => {
               {googleLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t('login.signingIn')}
                 </>
               ) : (
                 <>
                   <FcGoogle className="mr-2 h-5 w-5" />
-                  Sign in with Google
+                  {t('login.signInWithGoogle')}
                 </>
               )}
             </Button>
-
-            <p className="text-xs text-center text-muted-foreground mt-4">
-              By signing in, you agree to our terms and conditions
-            </p>
           </CardFooter>
         </form>
       </Card>
