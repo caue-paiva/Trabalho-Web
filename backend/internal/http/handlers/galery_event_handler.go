@@ -86,12 +86,19 @@ func (h *BaseHandler) ModifyGaleryEvent(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if req.ID == "" {
-		httputil.Error(w, fmt.Errorf("Request has no GaleryEvent ID"), http.StatusBadRequest)
+		httputil.Error(w, fmt.Errorf("request has no GaleryEvent ID"), http.StatusBadRequest)
 		return
 	}
 
 	event := mapper.ModifyGaleryRequestToEntity(req)
-	h.server.ModifyGaleryEvent(r.Context(), req.ID, event)
+	newEvent, err := h.server.ModifyGaleryEvent(r.Context(), req.ID, event)
+	if err != nil {
+		httputil.ErrorFromDomain(w, err)
+		return
+	}
+
+	response := mapper.GaleryEventToResponse(newEvent)
+	httputil.JSON(w, response, http.StatusOK)
 }
 
 // DeleteGaleryEvent handles DELETE /api/v1/galery_events/{id}

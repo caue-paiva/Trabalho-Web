@@ -513,11 +513,12 @@ func (r *DBRepository) ModifyGaleryEvent(ctx context.Context, id string, newEven
 		updates = append(updates, firestore.Update{Path: "date", Value: newEvent.Date})
 	}
 
-	if len(newEvent.ImageURLs) > 0 {
+	// we might want to delete images
+	if len(newEvent.ImageURLs) >= 0 {
 		updates = append(updates, firestore.Update{Path: "image_urls", Value: newEvent.ImageURLs})
 	}
 
-	if len(newEvent.ImageIDs) > 0 {
+	if len(newEvent.ImageIDs) >= 0 {
 		updates = append(updates, firestore.Update{Path: "image_ids", Value: newEvent.ImageIDs})
 	}
 

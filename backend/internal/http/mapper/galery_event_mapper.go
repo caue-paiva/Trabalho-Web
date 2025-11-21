@@ -22,8 +22,8 @@ type GaleryEventResponse struct {
 	Name      string    `json:"name"`
 	Location  string    `json:"location"`
 	Date      time.Time `json:"date"`
-	ImageURLs []string  `json:"image_urls"`
-	ImageIDs  []string  `json:"image_ids"`
+	ImageURLs []string  `json:"image_urls,omitzero"`
+	ImageIDs  []string  `json:"image_ids,omitzero"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -42,16 +42,26 @@ type ModifyGaleryEventRequest struct {
 
 // GaleryEventToResponse converts a GaleryEvent entity to a response DTO
 func GaleryEventToResponse(event entities.GaleryEvent) GaleryEventResponse {
-	return GaleryEventResponse{
+	resp := GaleryEventResponse{
 		ID:        event.ID,
 		Name:      event.Name,
 		Location:  event.Location,
 		Date:      event.Date,
-		ImageURLs: event.ImageURLs,
-		ImageIDs:  event.ImageIDs,
+		ImageURLs: []string(event.ImageURLs),
+		ImageIDs:  []string(event.ImageIDs),
 		CreatedAt: event.CreatedAt,
 		UpdatedAt: event.UpdatedAt,
 	}
+
+	if resp.ImageIDs == nil {
+		resp.ImageIDs = make([]string, 0)
+	}
+
+	if resp.ImageURLs == nil {
+		resp.ImageURLs = make([]string, 0)
+	}
+
+	return resp
 }
 
 // GaleryEventsToResponse converts multiple GaleryEvent entities to response DTOs
