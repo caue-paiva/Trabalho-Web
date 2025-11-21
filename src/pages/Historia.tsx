@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { Calendar, MapPin, Users, Award, Plus, Image as ImageIcon, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, MapPin, Users, Award, Plus, X, Trash2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
-import { FileUploadModal } from "@/components/FileUploadModal";
+import * as api from "@/services/api";
 
 interface TimelineEvent {
   id: string;
@@ -16,68 +17,12 @@ interface TimelineEvent {
   title: string;
   description: string;
   location: string;
-  images?: string[];
 }
 
 const Historia = () => {
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([
-    {
-      id: "1",
-      date: "2015-03-15",
-      title: "Fundação do Grupy Sanca",
-      description: "O grupo nasceu da necessidade de criar uma comunidade local de Python em São Carlos, inspirado por outros grupys pelo Brasil.",
-      location: "IFSP São Carlos"
-    },
-    {
-      id: "2",
-      date: "2016-05-20",
-      title: "Primeiro Workshop Oficial",
-      description: "Organizamos nosso primeiro workshop sobre Django, marcando o início das atividades educacionais regulares.",
-      location: "USP São Carlos"
-    },
-    {
-      id: "3",
-      date: "2017-08-10",
-      title: "Parcerias com Universidades",
-      description: "Estabelecemos parcerias formais com USP e IFSP para sediar eventos e atingir mais estudantes.",
-      location: "Múltiplas instituições"
-    },
-    {
-      id: "4",
-      date: "2018-11-18",
-      title: "Primeiro Python Day São Carlos",
-      description: "Organizamos um evento de dia inteiro com palestras, workshops e networking, nosso maior evento até então.",
-      location: "Centro de Convenções"
-    },
-    {
-      id: "5",
-      date: "2019-06-22",
-      title: "Expansão Regional",
-      description: "O grupo começou a receber participantes de cidades vizinhas, consolidando-se como referência regional.",
-      location: "São Carlos e região"
-    },
-    {
-      id: "6",
-      date: "2020-04-01",
-      title: "Eventos Online",
-      description: "Durante a pandemia, adaptamos todos os eventos para formato online, mantendo a comunidade ativa e unida.",
-      location: "Online"
-    },
-    {
-      id: "7",
-      date: "2022-09-15",
-      title: "Retorno Híbrido",
-      description: "Retomamos os eventos presenciais com transmissão online, ampliando nosso alcance e inclusividade.",
-      location: "Híbrido"
-    },
-    {
-      id: "8",
-      date: "2023-03-15",
-      title: "8 Anos de Comunidade",
-      description: "Celebramos 8 anos de atividades contínuas, com mais de 50 eventos realizados e centenas de pessoas impactadas.",
-      location: "São Carlos"
-    }
-  ]);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
   const [newTimelineData, setNewTimelineData] = useState({
@@ -86,7 +31,45 @@ const Historia = () => {
     description: "",
     location: "",
   });
-  const [newTimelineImages, setNewTimelineImages] = useState<File[]>([]);
+
+  const [entryToDelete, setEntryToDelete] = useState<TimelineEvent | null>(null);
+  const [isDeletingEntry, setIsDeletingEntry] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Fetch timeline entries on mount
+  useEffect(() => {
+    fetchTimelineEntries();
+  }, []);
+
+  const fetchTimelineEntries = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const entries = await api.listTimelineEntries();
+
+      // Transform API response to UI format
+      const transformedEntries: TimelineEvent[] = entries.map(entry => ({
+        id: entry.id,
+        date: entry.date,
+        title: entry.name,
+        description: entry.text,
+        location: entry.location,
+      }));
+
+      // Sort by date descending (newest first)
+      transformedEntries.sort((a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+
+      setTimelineEvents(transformedEntries);
+    } catch (err) {
+      console.error('Failed to fetch timeline entries:', err);
+      setError('Falha ao carregar entradas da linha do tempo. Tente novamente mais tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const achievements = [
     {
@@ -119,17 +102,53 @@ const Historia = () => {
     return new Date(dateString).getFullYear().toString();
   };
 
-  const handleCreateTimeline = () => {
-    console.log('CreateTimelineEntry triggered with data:', {
-      timelineData: newTimelineData,
-      images: newTimelineImages,
-    });
-    // TODO: Implement actual timeline entry creation logic
+  const handleCreateTimeline = async () => {
+    try {
+      console.log('Creating timeline entry with data:', newTimelineData);
 
-    // Reset form
-    setNewTimelineData({ date: "", title: "", description: "", location: "" });
-    setNewTimelineImages([]);
-    setShowCreateTimeline(false);
+      // Convert date to ISO format
+      const isoDate = new Date(newTimelineData.date).toISOString();
+
+      // Create timeline entry
+      await api.createTimelineEntry({
+        name: newTimelineData.title,
+        text: newTimelineData.description,
+        location: newTimelineData.location,
+        date: isoDate,
+      });
+
+      // Refresh timeline entries
+      await fetchTimelineEntries();
+
+      // Reset form
+      setNewTimelineData({ date: "", title: "", description: "", location: "" });
+      setShowCreateTimeline(false);
+    } catch (err) {
+      console.error('Failed to create timeline entry:', err);
+      alert('Falha ao criar entrada. Verifique o console para mais detalhes.');
+    }
+  };
+
+  const handleDeleteEntry = async () => {
+    if (!entryToDelete) return;
+
+    try {
+      setIsDeletingEntry(true);
+      setDeleteError(null);
+
+      await api.deleteTimelineEntry(entryToDelete.id);
+
+      // Close modal
+      setEntryToDelete(null);
+
+      // Refresh the timeline
+      await fetchTimelineEntries();
+    } catch (err) {
+      console.error('Failed to delete timeline entry:', err);
+      setDeleteError('Falha ao excluir a entrada. Tente novamente.');
+    } finally {
+      setIsDeletingEntry(false);
+    }
   };
 
   return (
@@ -204,59 +223,83 @@ const Historia = () => {
               </Button>
             </ShowWhenAuthenticated>
           </div>
-          <div className="relative">
-            {/* Continuous timeline line */}
-            <div
-              className="absolute left-[30px] top-[30px] w-1 bg-primary"
-              style={{ height: `calc(100% - 60px)` }}
-            ></div>
 
-            {timelineEvents.map((event, index) => (
-              <div key={event.id} className="flex gap-6 items-start mb-8 last:mb-0">
-                <div className="flex flex-col items-center relative w-[60px]">
-                  <div className="bg-primary text-primary-foreground rounded-full p-3 font-bold text-lg w-[60px] h-[60px] flex items-center justify-center relative z-10">
-                    {getYearFromDate(event.date)}
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">Carregando...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <p className="text-destructive mb-4">{error}</p>
+              <Button onClick={fetchTimelineEntries}>Tentar Novamente</Button>
+            </div>
+          ) : timelineEvents.length === 0 ? (
+            <div className="text-center py-16 bg-muted rounded-lg">
+              <Calendar className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma entrada na linha do tempo ainda</h3>
+              <p className="text-muted-foreground mb-4">
+                Adicione a primeira entrada para começar a contar a história!
+              </p>
+              <ShowWhenAuthenticated>
+                <Button onClick={() => setShowCreateTimeline(true)}>
+                  Adicionar Primeira Entrada
+                </Button>
+              </ShowWhenAuthenticated>
+            </div>
+          ) : (
+            <div className="relative">
+              {/* Continuous timeline line */}
+              <div
+                className="absolute left-[30px] top-[30px] w-1 bg-primary"
+                style={{ height: `calc(100% - 60px)` }}
+              ></div>
+
+              {timelineEvents.map((event) => (
+                <div key={event.id} className="flex gap-6 items-start mb-8 last:mb-0">
+                  <div className="flex flex-col items-center relative w-[60px]">
+                    <div className="bg-primary text-primary-foreground rounded-full p-3 font-bold text-lg w-[60px] h-[60px] flex items-center justify-center relative z-10">
+                      {getYearFromDate(event.date)}
+                    </div>
                   </div>
-                </div>
 
-                <Card className="flex-1 hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-start justify-between flex-wrap gap-2">
-                      <div className="flex flex-col gap-1">
-                        <span>{event.title}</span>
-                        <div className="flex items-center gap-1 text-sm font-normal text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(event.date)}
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {event.location}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                      {event.description}
-                    </p>
-                    {/* Image placeholders - exclude first entry and specific years */}
-                    {index !== 0 && getYearFromDate(event.date) !== "2020" && (
-                      <div className={`grid gap-3 mt-4 ${index === 1 || index === 3 || index === 6 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                        {((index === 1 || index === 3 || index === 6) ? [1, 2] : [1]).map((imgIndex) => (
-                          <div key={imgIndex} className="bg-muted rounded-lg h-32 flex items-center justify-center">
-                            <div className="text-center text-muted-foreground">
-                              <Calendar className="h-8 w-8 mx-auto mb-1 opacity-50" />
-                              <p className="text-xs">Foto {imgIndex}</p>
-                            </div>
+                  <Card className="flex-1 hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-start justify-between flex-wrap gap-2">
+                        <div className="flex flex-col gap-1">
+                          <span>{event.title}</span>
+                          <div className="flex items-center gap-1 text-sm font-normal text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(event.date)}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {event.location}
+                          </Badge>
+                          <ShowWhenAuthenticated>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => setEntryToDelete(event)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </ShowWhenAuthenticated>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {event.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Create Timeline Entry Modal */}
@@ -265,10 +308,54 @@ const Historia = () => {
           onOpenChange={setShowCreateTimeline}
           timelineData={newTimelineData}
           onTimelineDataChange={setNewTimelineData}
-          timelineImages={newTimelineImages}
-          onTimelineImagesChange={setNewTimelineImages}
           onSubmit={handleCreateTimeline}
         />
+
+        {/* Delete Timeline Entry Confirmation Modal */}
+        {entryToDelete && (
+          <Dialog open={!!entryToDelete} onOpenChange={() => setEntryToDelete(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Excluir Entrada</DialogTitle>
+              </DialogHeader>
+
+              {deleteError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{deleteError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Tem certeza que deseja excluir a entrada <strong>{entryToDelete.title}</strong>?
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Esta ação não pode ser desfeita. A entrada será permanentemente removida da linha do tempo.
+                </p>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setEntryToDelete(null)}
+                  disabled={isDeletingEntry}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteEntry}
+                  disabled={isDeletingEntry}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isDeletingEntry ? 'Excluindo...' : 'Excluir Entrada'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
@@ -285,8 +372,6 @@ interface CreateTimelineEntryModalProps {
     location: string;
   };
   onTimelineDataChange: (data: any) => void;
-  timelineImages: File[];
-  onTimelineImagesChange: (images: File[]) => void;
   onSubmit: () => void;
 }
 
@@ -295,11 +380,8 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
   onOpenChange,
   timelineData,
   onTimelineDataChange,
-  timelineImages,
-  onTimelineImagesChange,
   onSubmit,
 }) => {
-  const [showImageUpload, setShowImageUpload] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -308,10 +390,6 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
 
   const handleClose = () => {
     onOpenChange(false);
-  };
-
-  const removeImage = (index: number) => {
-    onTimelineImagesChange(timelineImages.filter((_, i) => i !== index));
   };
 
   const isFormValid =
@@ -388,67 +466,6 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
               </div>
             </div>
 
-            {/* Timeline Images */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Imagens</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowImageUpload(true)}
-                  className="gap-2"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                  Adicionar Imagens
-                </Button>
-              </div>
-
-              {timelineImages.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    {timelineImages.length} imagem(ns) selecionada(s)
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {timelineImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
-                      >
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={image.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeImage(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-1">
-                          <p className="text-xs truncate">{image.name}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {timelineImages.length === 0 && (
-                <div className="text-center py-8 border-2 border-dashed rounded-lg border-muted-foreground/25">
-                  <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Nenhuma imagem adicionada ainda
-                  </p>
-                </div>
-              )}
-            </div>
-
             {/* Action Buttons */}
             <div className="flex gap-2 justify-end pt-4 border-t">
               <Button type="button" variant="outline" onClick={handleClose}>
@@ -462,24 +479,6 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
           </form>
         </DialogContent>
       </Dialog>
-
-      {/* Nested Image Upload Modal */}
-      <FileUploadModal
-        open={showImageUpload}
-        onOpenChange={setShowImageUpload}
-        onUpload={(files) => {
-          onTimelineImagesChange([...timelineImages, ...files]);
-          setShowImageUpload(false);
-        }}
-        title="Adicionar Imagens à Entrada"
-        uploadButtonText="Adicionar"
-        config={{
-          accept: "image/*",
-          maxSize: 10 * 1024 * 1024, // 10MB
-          multiple: true,
-          fileCategory: "image",
-        }}
-      />
     </>
   );
 };
