@@ -214,6 +214,15 @@ export async function modifyGaleryEventRequest(request: ModifyGaleryEventRequest
   });
 }
 
+/**
+ * Delete galery event by ID
+ */
+export async function deleteGaleryEvent(id: string): Promise<void> {
+  await apiFetchNoJSON(`/galery_events/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // ==================
 // TIMELINE API
 // ==================

@@ -51,6 +51,8 @@ const Galeria = () => {
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<GaleryEventDisplay | null>(null);
+  const [isDeletingEvent, setIsDeletingEvent] = useState(false);
   const [newEventData, setNewEventData] = useState({
     name: "",
     date: "",
@@ -270,6 +272,28 @@ const Galeria = () => {
     return !/.*-\d+$/.test(photoId);
   };
 
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+
+    try {
+      setIsDeletingEvent(true);
+      setDeleteError(null);
+
+      await api.deleteGaleryEvent(eventToDelete.id);
+
+      // Close modal
+      setEventToDelete(null);
+
+      // Refresh the gallery to remove the deleted event
+      await fetchGalleryData();
+    } catch (err) {
+      console.error('Failed to delete event:', err);
+      setDeleteError('Falha ao excluir o evento. Tente novamente.');
+    } finally {
+      setIsDeletingEvent(false);
+    }
+  };
+
   const handleCreateEvent = async () => {
     try {
       console.log('Creating event with data:', {
@@ -382,9 +406,21 @@ const Galeria = () => {
                   <CardHeader>
                     <CardTitle className="flex items-start justify-between gap-4">
                       <span>{event.name}</span>
-                      <Badge variant="secondary" className="shrink-0">
-                        {event.photos.length} fotos
-                      </Badge>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="secondary">
+                          {event.photos.length} fotos
+                        </Badge>
+                        <ShowWhenAuthenticated>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => setEventToDelete(event)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </ShowWhenAuthenticated>
+                      </div>
                     </CardTitle>
                     <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
@@ -590,6 +626,52 @@ const Galeria = () => {
                   )}
                 </DialogFooter>
               </ShowWhenAuthenticated>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Delete Event Confirmation Modal */}
+        {eventToDelete && (
+          <Dialog open={!!eventToDelete} onOpenChange={() => setEventToDelete(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Excluir Evento</DialogTitle>
+              </DialogHeader>
+
+              {deleteError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{deleteError}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Tem certeza que deseja excluir o evento <strong>{eventToDelete.name}</strong>?
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Esta ação não pode ser desfeita. O evento será permanentemente removido.
+                </p>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setEventToDelete(null)}
+                  disabled={isDeletingEvent}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteEvent}
+                  disabled={isDeletingEvent}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isDeletingEvent ? 'Excluindo...' : 'Excluir Evento'}
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
