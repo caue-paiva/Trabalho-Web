@@ -3,13 +3,18 @@
  * Handles all communication with the backend API
  */
 
+import { getAuthToken } from '@/auth/httpClient';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 /**
- * Base fetch wrapper with error handling
+ * Base fetch wrapper with error handling and authentication
  */
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${endpoint}`;
+
+  // Get authentication token
+  const token = await getAuthToken();
 
   try {
     const response = await fetch(url, {
@@ -17,6 +22,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> 
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
 
@@ -41,12 +47,16 @@ async function apiFetchNoJSON(
 ): Promise<void> {
   const url = `${API_URL}${endpoint}`;
 
+  // Get authentication token
+  const token = await getAuthToken();
+
   try {
     const response = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,
+        ...(token && { Authorization: `Bearer ${token}` }),
       },
     });
 
