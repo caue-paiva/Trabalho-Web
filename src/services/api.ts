@@ -113,9 +113,12 @@ export async function listAllImages(): Promise<Image[]> {
 /**
  * Get images by gallery slug
  */
+// After
 export async function getImagesBySlug(slug: string): Promise<Image[]> {
-  return apiFetch<Image[]>(`/images/slug/${slug}`);
+  const res = await apiFetch<Image[] | null>(`/images/slug/${slug}`);
+  return res ?? [];
 }
+
 
 /**
  * Upload new image
@@ -168,6 +171,15 @@ export interface CreateGaleryEventRequest {
   images_base64: string[];
 }
 
+export interface ModifyGaleryEventRequest {
+  id: string;
+  name: string;
+  location: string;
+  date: string; // ISO 8601 date string
+  image_urls: string[];
+  image_ids: string[];
+}
+
 /**
  * Get galery event by ID
  */
@@ -178,8 +190,10 @@ export async function getGaleryEventById(id: string): Promise<GaleryEvent> {
 /**
  * List all galery events
  */
+
 export async function listGaleryEvents(): Promise<GaleryEvent[]> {
-  return apiFetch<GaleryEvent[]>('/galery_events');
+  const res = await apiFetch<GaleryEvent[] | null>('/galery_events');
+  return res ?? [];
 }
 
 /**
@@ -188,6 +202,14 @@ export async function listGaleryEvents(): Promise<GaleryEvent[]> {
 export async function createGaleryEvent(request: CreateGaleryEventRequest): Promise<GaleryEvent> {
   return apiFetch<GaleryEvent>('/galery_events', {
     method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+
+export async function modifyGaleryEventRequest(request: ModifyGaleryEventRequest): Promise<GaleryEvent> {
+  return apiFetch<GaleryEvent>('/galery_events', {
+    method: 'PUT',
     body: JSON.stringify(request),
   });
 }

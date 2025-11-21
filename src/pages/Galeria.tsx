@@ -29,13 +29,24 @@ interface GaleryEventDisplay {
   photos: Photo[];
 }
 
+type SelectedPhotoSource =
+  | { source: "gallery" }
+  | { source: "event"; eventId: string };
+
+type SelectedPhoto = Photo &
+  SelectedPhotoSource & {
+    eventName?: string;
+    eventDate?: string;
+    eventLocation?: string;
+  };
+
 const Galeria = () => {
   const [events, setEvents] = useState<GaleryEventDisplay[]>([]);
   const [allPhotos, setAllPhotos] = useState<(Photo & { eventName?: string; eventDate?: string; eventLocation?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<SelectedPhoto | null>(null);
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -78,16 +89,6 @@ const Galeria = () => {
 
       setEvents(transformedEvents);
 
-      // For "Todas as fotos", we flatten all event photos
-      const allEventPhotos = transformedEvents.flatMap(event =>
-        event.photos.map(photo => ({
-          ...photo,
-          eventName: event.name,
-          eventDate: event.date,
-          eventLocation: event.location,
-        }))
-      );
-
       // Also fetch all individual images from the backend
       try {
         const galleryImages = await api.getImagesBySlug(GallerySlug);
@@ -103,19 +104,18 @@ const Galeria = () => {
           eventLocation: img.location,
         }));
 
-        // Merge event photos and gallery images
-        allEventPhotos.push(...transformedGalleryImages);
+        // Sort all photos by upload date (newest first)
+        transformedGalleryImages.sort((a, b) =>
+          new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+        );
+
+        setAllPhotos(transformedGalleryImages);
       } catch (imgErr) {
         // If gallery images don't exist yet, that's okay - just continue with event photos
         console.log('No gallery images found or error fetching them:', imgErr);
       }
 
-      // Sort all photos by upload date (newest first)
-      allEventPhotos.sort((a, b) =>
-        new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
-      );
 
-      setAllPhotos(allEventPhotos);
     } catch (err) {
       console.error('Failed to fetch gallery data:', err);
       setError('Falha ao carregar as fotos. Tente novamente mais tarde.');
@@ -224,6 +224,44 @@ const Galeria = () => {
       setIsDeleting(false);
     }
   };
+
+  const handleDeleteEventPhoto = async (photo: SelectedPhoto) => {
+    if (photo.source !== "event") return;
+
+    try {
+      setIsDeleting(true);
+      setDeleteError(null);
+
+      const event = events.find((e) => e.id === photo.eventId);
+      if (!event) {
+        throw new Error("Evento não encontrado");
+      }
+
+      const remainingPhotos = event.photos.filter((p) => p.id !== photo.id);
+      console.log(remainingPhotos)
+
+      const request: api.ModifyGaleryEventRequest = {
+        id: event.id,
+        name: event.name,
+        location: event.location,
+        date: event.date,
+        image_ids: remainingPhotos.map((p) => p.id),
+        image_urls: remainingPhotos.map((p) => p.url),
+      };
+
+      await api.modifyGaleryEventRequest(request);
+
+      // Close modal and refresh
+      setSelectedPhoto(null);
+      await fetchGalleryData();
+    } catch (err) {
+      console.error("Failed to remove photo from event:", err);
+      setDeleteError("Falha ao excluir a imagem do evento. Tente novamente.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
 
   // Check if a photo can be deleted (has a real Firestore ID, not a composite ID)
   const canDeletePhoto = (photoId: string): boolean => {
@@ -366,12 +404,16 @@ const Galeria = () => {
                           <div
                             key={`${event.id}-photo-${index}`}
                             className="aspect-square bg-muted rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
-                            onClick={() => setSelectedPhoto({
-                              ...photo,
-                              eventName: event.name,
-                              eventDate: event.date,
-                              eventLocation: event.location
-                            } as any)}
+                            onClick={() =>
+                              setSelectedPhoto({
+                                ...photo,
+                                eventName: event.name,
+                                eventDate: event.date,
+                                eventLocation: event.location,
+                                source: "event",
+                                eventId: event.id,
+                              })
+                            }
                           >
                             <img
                               src={photo.url}
@@ -412,7 +454,7 @@ const Galeria = () => {
         {/* All Photos Gallery */}
         <div>
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-foreground">Todas as fotos</h2>
+            <h2 className="text-3xl font-bold text-foreground">Mais fotos</h2>
             <ShowWhenAuthenticated>
               <Button onClick={() => setShowImageUpload(true)} className="gap-2">
                 <ImagePlus className="h-4 w-4" />
@@ -429,7 +471,12 @@ const Galeria = () => {
                 <div
                   key={photo.id}
                   className="relative aspect-square bg-muted rounded-lg cursor-pointer hover:opacity-80 transition-opacity overflow-hidden group"
-                  onClick={() => setSelectedPhoto(photo)}
+                  onClick={() =>
+                    setSelectedPhoto({
+                      ...photo,
+                      source: "gallery",
+                    })
+                  }
                 >
                   <img
                     src={photo.url}
@@ -487,34 +534,37 @@ const Galeria = () => {
                   />
                 </div>
 
-                {((selectedPhoto as any).eventDate || (selectedPhoto as any).eventLocation || (selectedPhoto as any).eventName) && (
-                  <div className="space-y-2">
-                    {(selectedPhoto as any).eventDate && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate((selectedPhoto as any).eventDate)}
-                      </div>
-                    )}
-                    {(selectedPhoto as any).eventLocation && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        {(selectedPhoto as any).eventLocation}
-                      </div>
-                    )}
-                    {(selectedPhoto as any).eventName && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-3 w-3" />
-                        Evento: {(selectedPhoto as any).eventName}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {(selectedPhoto.eventDate ||
+                  selectedPhoto.eventLocation ||
+                  selectedPhoto.eventName) && (
+                    <div className="space-y-2">
+                      {selectedPhoto.eventDate && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(selectedPhoto.eventDate)}
+                        </div>
+                      )}
+                      {selectedPhoto.eventLocation && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          {selectedPhoto.eventLocation}
+                        </div>
+                      )}
+                      {selectedPhoto.eventName && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          Evento: {selectedPhoto.eventName}
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
 
               {/* Only show delete button for images with real Firestore IDs */}
-              {canDeletePhoto(selectedPhoto.id) && (
-                <ShowWhenAuthenticated>
-                  <DialogFooter>
+              <ShowWhenAuthenticated>
+                <DialogFooter>
+                  {/* Gallery photo - delete the image resource */}
+                  {selectedPhoto.source === "gallery" && canDeletePhoto(selectedPhoto.id) && (
                     <Button
                       variant="destructive"
                       onClick={handleDeleteImage}
@@ -522,11 +572,24 @@ const Galeria = () => {
                       className="gap-2"
                     >
                       <Trash2 className="h-4 w-4" />
-                      {isDeleting ? 'Excluindo...' : 'Excluir Imagem'}
+                      {isDeleting ? "Excluindo..." : "Excluir Imagem"}
                     </Button>
-                  </DialogFooter>
-                </ShowWhenAuthenticated>
-              )}
+                  )}
+
+                  {/* Event photo - remove the photo from the event via modifyGaleryEventRequest */}
+                  {selectedPhoto.source === "event" && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteEventPhoto(selectedPhoto)}
+                      disabled={isDeleting}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {isDeleting ? "Excluindo..." : "Remover do evento"}
+                    </Button>
+                  )}
+                </DialogFooter>
+              </ShowWhenAuthenticated>
             </DialogContent>
           </Dialog>
         )}
