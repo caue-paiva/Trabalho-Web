@@ -84,7 +84,7 @@ const Index = () => {
                 </Button>
 
                 <Button size="lg" className="px-8 py-3 text-lg text-black font-semibold hover:opacity-90" style={{ backgroundColor: '#FADA5E' }} asChild>
-                  <a href={featuredEvent?.link ?? "https://eventos.grupysanca.com.br"} target="_blank" rel="noopener noreferrer">
+                  <a href="https://eventos.grupysanca.com.br" target="_blank" rel="noopener noreferrer">
                     {t("home.viewEvents")}
                     <Calendar className="ml-2 h-5 w-5" />
                   </a>
