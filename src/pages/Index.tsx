@@ -120,11 +120,11 @@ const Index = () => {
             </div>
 
             {/* Right side - Featured Event */}
-            <div className="hidden lg:flex lg:flex-col lg:items-end lg:justify-end">
+            <div className="flex flex-col items-center lg:items-end lg:justify-end mt-8 lg:mt-0">
               {featuredEvent ? (() => {
                 const { day, month, time } = formatDate(featuredEvent.starts_at);
                 return (
-                  <div className="w-[90%] flex flex-col gap-2">
+                  <div className="w-full lg:w-[90%] flex flex-col gap-2">
                     {/* Header box */}
                     <div className="bg-secondary/50 rounded-lg px-4 py-2">
                       <h3 className="text-sm font-semibold text-foreground">Próximo Evento</h3>
@@ -182,7 +182,7 @@ const Index = () => {
                   </div>
                 );
               })() : (
-                <div className="w-[90%] flex flex-col gap-2">
+                <div className="w-full lg:w-[90%] flex flex-col gap-2">
                   <div className="bg-secondary/50 rounded-lg px-4 py-2">
                     <h3 className="text-sm font-semibold text-foreground">Próximo Evento</h3>
                   </div>

@@ -210,7 +210,7 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
@@ -218,10 +218,10 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Drag and Drop Area */}
           <div
-            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            className={`relative border-2 border-dashed rounded-lg p-4 sm:p-8 text-center transition-colors ${
               dragActive
                 ? "border-primary bg-primary/5"
                 : "border-muted-foreground/25 hover:border-muted-foreground/50"
@@ -241,9 +241,9 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
             />
 
             <div className="flex flex-col items-center gap-2">
-              <IconComponent className="h-12 w-12 text-muted-foreground/50" />
+              <IconComponent className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground/50" />
               <div>
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-xs sm:text-sm font-medium text-foreground">
                   Arraste arquivos aqui ou{" "}
                   <label
                     htmlFor="file-upload"
@@ -279,11 +279,11 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 {selectedFiles.map((fileWithError, index) => (
                   <div
                     key={index}
-                    className={`flex items-center justify-between p-2 rounded-lg ${
+                    className={`flex items-center justify-between p-2 rounded-lg overflow-hidden ${
                       fileWithError.error ? "bg-destructive/10" : "bg-muted"
                     }`}
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
                       <IconComponent
                         className={`h-4 w-4 flex-shrink-0 ${
                           fileWithError.error
@@ -291,23 +291,24 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
                             : "text-muted-foreground"
                         }`}
                       />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
                           <span
-                            className={`text-sm truncate ${
+                            className={`text-sm block truncate overflow-hidden text-ellipsis ${
                               fileWithError.error
                                 ? "text-destructive"
                                 : "text-foreground"
                             }`}
+                            title={fileWithError.file.name}
                           >
                             {fileWithError.file.name}
                           </span>
-                          <span className="text-xs text-muted-foreground flex-shrink-0">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
                             ({(fileWithError.file.size / 1024).toFixed(1)} KB)
                           </span>
                         </div>
                         {fileWithError.error && (
-                          <p className="text-xs text-destructive">
+                          <p className="text-xs text-destructive mt-1">
                             {fileWithError.error}
                           </p>
                         )}
@@ -328,14 +329,14 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 justify-end pt-4">
-            <Button variant="outline" onClick={handleClose}>
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end pt-4">
+            <Button variant="outline" onClick={handleClose} className="w-full sm:w-auto">
               Cancelar
             </Button>
             <Button
               onClick={handleUpload}
               disabled={validFilesCount === 0}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <Upload className="h-4 w-4" />
               {uploadButtonText}{" "}

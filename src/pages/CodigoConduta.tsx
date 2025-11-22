@@ -13,7 +13,7 @@ const CodigoConduta = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Código de Conduta
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed whitespace-nowrap">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Nosso compromisso em manter uma comunidade acolhedora, diversa e respeitosa para todos.
           </p>
         </div>

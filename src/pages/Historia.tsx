@@ -331,7 +331,7 @@ const Historia = () => {
         {/* Delete Timeline Entry Confirmation Modal */}
         {entryToDelete && (
           <Dialog open={!!entryToDelete} onOpenChange={() => setEntryToDelete(null)}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-[95vw] sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Excluir Entrada</DialogTitle>
               </DialogHeader>
@@ -420,7 +420,7 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />

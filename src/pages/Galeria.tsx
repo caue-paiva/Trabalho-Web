@@ -460,7 +460,7 @@ const Galeria = () => {
                   </CardHeader>
                   <CardContent>
                     {event.photos.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {event.photos.slice(0, 6).map((photo, index) => (
                           <div
                             key={`${event.id}-photo-${index}`}
@@ -566,7 +566,7 @@ const Galeria = () => {
         {/* Photo Modal */}
         {selectedPhoto && (
           <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="max-w-[95vw] sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>{selectedPhoto.caption}</DialogTitle>
               </DialogHeader>
@@ -579,7 +579,7 @@ const Galeria = () => {
               )}
 
               <div className="space-y-4">
-                <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                <div className="min-h-[50vh] max-h-[70vh] bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                   <img
                     src={selectedPhoto.url}
                     alt={selectedPhoto.caption}
@@ -658,7 +658,7 @@ const Galeria = () => {
         {/* Delete Event Confirmation Modal */}
         {eventToDelete && (
           <Dialog open={!!eventToDelete} onOpenChange={() => setEventToDelete(null)}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="max-w-[95vw] sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Excluir Evento</DialogTitle>
               </DialogHeader>
@@ -783,7 +783,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
