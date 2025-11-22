@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Users, Award, Plus, X, Trash2, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, Users, Award, Plus, X, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
+import { useToast } from "@/hooks/use-toast";
 import * as api from "@/services/api";
 
 interface TimelineEvent {
@@ -20,11 +21,13 @@ interface TimelineEvent {
 }
 
 const Historia = () => {
+  const { toast } = useToast();
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
+  const [isCreatingEntry, setIsCreatingEntry] = useState(false);
   const [newTimelineData, setNewTimelineData] = useState({
     date: "",
     title: "",
@@ -104,6 +107,7 @@ const Historia = () => {
 
   const handleCreateTimeline = async () => {
     try {
+      setIsCreatingEntry(true);
       console.log('Creating timeline entry with data:', newTimelineData);
 
       // Convert date to ISO format
@@ -120,12 +124,24 @@ const Historia = () => {
       // Refresh timeline entries
       await fetchTimelineEntries();
 
+      // Show success toast
+      toast({
+        title: "Sucesso!",
+        description: "Entrada da linha do tempo criada com sucesso!",
+      });
+
       // Reset form
       setNewTimelineData({ date: "", title: "", description: "", location: "" });
       setShowCreateTimeline(false);
     } catch (err) {
       console.error('Failed to create timeline entry:', err);
-      alert('Falha ao criar entrada. Verifique o console para mais detalhes.');
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar entrada",
+        description: "Falha ao criar entrada. Verifique o console para mais detalhes.",
+      });
+    } finally {
+      setIsCreatingEntry(false);
     }
   };
 
@@ -309,6 +325,7 @@ const Historia = () => {
           timelineData={newTimelineData}
           onTimelineDataChange={setNewTimelineData}
           onSubmit={handleCreateTimeline}
+          isCreatingEntry={isCreatingEntry}
         />
 
         {/* Delete Timeline Entry Confirmation Modal */}
@@ -373,6 +390,7 @@ interface CreateTimelineEntryModalProps {
   };
   onTimelineDataChange: (data: any) => void;
   onSubmit: () => void;
+  isCreatingEntry: boolean;
 }
 
 const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
@@ -381,6 +399,7 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
   timelineData,
   onTimelineDataChange,
   onSubmit,
+  isCreatingEntry,
 }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -471,9 +490,13 @@ const CreateTimelineEntryModal: React.FC<CreateTimelineEntryModalProps> = ({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={!isFormValid} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Adicionar Entrada
+              <Button type="submit" disabled={!isFormValid || isCreatingEntry} className="gap-2">
+                {isCreatingEntry ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {isCreatingEntry ? "Criando..." : "Adicionar Entrada"}
               </Button>
             </div>
           </form>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Users, Image as ImageIcon, ImagePlus, Plus, X, Trash2, AlertCircle } from "lucide-react";
+import { Calendar, MapPin, Users, Image as ImageIcon, ImagePlus, Plus, X, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShowWhenAuthenticated } from "@/auth/AuthSwitch";
 import { FileUploadModal } from "@/components/FileUploadModal";
+import { useToast } from "@/hooks/use-toast";
 import * as api from "@/services/api";
 
 const GallerySlug = "gallery_mais_fotos"
@@ -41,6 +42,7 @@ type SelectedPhoto = Photo &
   };
 
 const Galeria = () => {
+  const { toast } = useToast();
   const [events, setEvents] = useState<GaleryEventDisplay[]>([]);
   const [allPhotos, setAllPhotos] = useState<(Photo & { eventName?: string; eventDate?: string; eventLocation?: string })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,7 @@ const Galeria = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<GaleryEventDisplay | null>(null);
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   const [newEventData, setNewEventData] = useState({
     name: "",
     date: "",
@@ -198,10 +201,19 @@ const Galeria = () => {
       // Only refresh the galeria-geral images, not all events
       await refreshGalleryImages();
 
-      alert(`${uploadedImages.length} imagem(ns) enviada(s) com sucesso!`);
+      toast({
+        title: "Sucesso!",
+        description: uploadedImages.length === 1
+          ? "1 imagem enviada com sucesso!"
+          : `${uploadedImages.length} imagens enviadas com sucesso!`,
+      });
     } catch (err) {
       console.error('Failed to upload images:', err);
-      alert('Falha ao enviar imagens. Verifique o console para mais detalhes.');
+      toast({
+        variant: "destructive",
+        title: "Erro ao enviar imagens",
+        description: "Falha ao enviar imagens. Verifique o console para mais detalhes.",
+      });
     }
   };
 
@@ -296,6 +308,7 @@ const Galeria = () => {
 
   const handleCreateEvent = async () => {
     try {
+      setIsCreatingEvent(true);
       console.log('Creating event with data:', {
         eventData: newEventData,
         images: newEventImages,
@@ -320,13 +333,25 @@ const Galeria = () => {
       // Refresh the gallery data
       await fetchGalleryData();
 
+      // Show success toast
+      toast({
+        title: "Sucesso!",
+        description: "Evento criado com sucesso!",
+      });
+
       // Reset form
       setNewEventData({ name: "", date: "", location: "", description: "" });
       setNewEventImages([]);
       setShowCreateEvent(false);
     } catch (err) {
       console.error('Failed to create event:', err);
-      alert('Falha ao criar evento. Verifique o console para mais detalhes.');
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar evento",
+        description: "Falha ao criar evento. Verifique o console para mais detalhes.",
+      });
+    } finally {
+      setIsCreatingEvent(false);
     }
   };
 
@@ -700,6 +725,7 @@ const Galeria = () => {
           eventImages={newEventImages}
           onEventImagesChange={setNewEventImages}
           onSubmit={handleCreateEvent}
+          isCreatingEvent={isCreatingEvent}
         />
       </div>
     </div>
@@ -720,6 +746,7 @@ interface CreateEventModalProps {
   eventImages: File[];
   onEventImagesChange: (images: File[]) => void;
   onSubmit: () => void;
+  isCreatingEvent: boolean;
 }
 
 const CreateEventModal: React.FC<CreateEventModalProps> = ({
@@ -730,6 +757,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
   eventImages,
   onEventImagesChange,
   onSubmit,
+  isCreatingEvent,
 }) => {
   const [showImageUpload, setShowImageUpload] = useState(false);
 
@@ -888,9 +916,13 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={!isFormValid} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Criar Evento
+              <Button type="submit" disabled={!isFormValid || isCreatingEvent} className="gap-2">
+                {isCreatingEvent ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {isCreatingEvent ? "Criando..." : "Criar Evento"}
               </Button>
             </div>
           </form>
