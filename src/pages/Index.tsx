@@ -50,6 +50,33 @@ const Index = () => {
     return clean.trim();
   };
 
+  const linkifyText = (text: string) => {
+    // URL regex pattern that matches http(s) URLs and t.me links
+    const urlRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s)]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      // Check if this part is a URL
+      if (part.match(urlRegex)) {
+        // Add https:// protocol if it's a t.me link without protocol
+        const href = part.startsWith('t.me/') ? `https://${part}` : part;
+        return (
+          <a
+            key={index}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      // Return regular text, preserving newlines
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -133,7 +160,7 @@ const Index = () => {
 
                             {/* removed line-clamp-3 so the box can grow with content */}
                             <p className="text-sm text-muted-foreground break-words whitespace-pre-line">
-                              {sanitizeAndExtractText(featuredEvent.description)}
+                              {linkifyText(sanitizeAndExtractText(featuredEvent.description))}
                             </p>
                           </div>
                         </div>
