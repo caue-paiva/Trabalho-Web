@@ -35,6 +35,17 @@ const Index = () => {
     };
   };
 
+  const isEventInPast = (dateString: string): boolean => {
+    const eventDate = new Date(dateString);
+    const today = new Date();
+
+    // Set both dates to midnight for day-only comparison
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return eventDate < today;
+  };
+
   const sanitizeAndExtractText = (html: string | undefined): string => {
     if (!html) return '';
     // Convert HTML line breaks to newlines before stripping tags
@@ -123,11 +134,14 @@ const Index = () => {
             <div className="flex flex-col items-center lg:items-end lg:justify-end mt-8 lg:mt-0">
               {featuredEvent ? (() => {
                 const { day, month, time } = formatDate(featuredEvent.starts_at);
+                const isPast = isEventInPast(featuredEvent.starts_at);
                 return (
                   <div className="w-full lg:w-[90%] flex flex-col gap-2">
                     {/* Header box */}
                     <div className="bg-secondary/50 rounded-lg px-4 py-2">
-                      <h3 className="text-sm font-semibold text-foreground">Próximo Evento</h3>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {isPast ? "Evento Mais Recente" : "Próximo Evento"}
+                      </h3>
                     </div>
 
                     {/* Event card */}
@@ -173,7 +187,7 @@ const Index = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                             >
-                              {t("events.learnMore")}
+                              {isPast ? "Ver Detalhes" : t("events.learnMore")}
                             </a>
                           </Button>
                         </div>
@@ -184,7 +198,7 @@ const Index = () => {
               })() : (
                 <div className="w-full lg:w-[90%] flex flex-col gap-2">
                   <div className="bg-secondary/50 rounded-lg px-4 py-2">
-                    <h3 className="text-sm font-semibold text-foreground">Próximo Evento</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Carregando eventos</h3>
                   </div>
                   <div className="min-h-[280px]">
                     <div className="animate-pulse space-y-4 p-6">
