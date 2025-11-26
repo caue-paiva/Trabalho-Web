@@ -3,7 +3,6 @@
  *
  * Provides a user interface for authentication with:
  * - Email/password login
- * - Google social login
  * - Error handling and loading states
  */
 
@@ -15,20 +14,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { FcGoogle } from 'react-icons/fc';
 import { Loader2 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signInWithEmail, signInWithGoogle, isMockMode } = useAuth();
+  const { signInWithEmail, isMockMode } = useAuth();
   const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -57,32 +54,6 @@ const Login = () => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setError(null);
-    setGoogleLoading(true);
-
-    try {
-      await signInWithGoogle();
-      navigate('/');
-    } catch (err) {
-
-      if (err instanceof Error) {
-        if (err.message.includes('auth/popup-closed-by-user')) {
-          setError(t('login.errors.popupClosed'));
-        } else if (err.message.includes('auth/cancelled-popup-request')) {
-          // User cancelled, no need to show error
-          setError(null);
-        } else {
-          setError(t('login.errors.googleSignInFailed'));
-        }
-      } else {
-        setError(t('login.errors.unexpectedGoogle'));
-      }
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -124,7 +95,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading || googleLoading}
+                disabled={loading}
               />
             </div>
 
@@ -137,7 +108,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                disabled={loading || googleLoading}
+                disabled={loading}
               />
             </div>
           </CardContent>
@@ -146,7 +117,7 @@ const Login = () => {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || googleLoading}
+              disabled={loading}
             >
               {loading ? (
                 <>
@@ -155,37 +126,6 @@ const Login = () => {
                 </>
               ) : (
                 t('login.signInButton')
-              )}
-            </Button>
-
-            <div className="relative w-full">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  {t('login.orContinueWith')}
-                </span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogleLogin}
-              disabled={loading || googleLoading}
-            >
-              {googleLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('login.signingIn')}
-                </>
-              ) : (
-                <>
-                  <FcGoogle className="mr-2 h-5 w-5" />
-                  {t('login.signInWithGoogle')}
-                </>
               )}
             </Button>
           </CardFooter>

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import ptTranslations from "@/locales/pt.json";
-import enTranslations from "@/locales/en.json";
 
 type Language = "pt" | "en";
 type TranslationKey = string;
@@ -13,7 +12,6 @@ interface LanguageContextType {
 
 const translations = {
   pt: ptTranslations,
-  en: enTranslations,
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -31,7 +29,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const t = (key: TranslationKey): string => {
     const keys = key.split(".");
     let value: any = translations[language];
-    
+
     for (const k of keys) {
       if (value && typeof value === "object" && k in value) {
         value = value[k];
@@ -40,7 +38,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
         return key;
       }
     }
-    
+
     return typeof value === "string" ? value : key;
   };
 
