@@ -424,35 +424,40 @@ export async function getExternalEvents(params?: {
 }
 
 export async function getLatestExternalEvent(): Promise<ExternalEvent | null> {
-  // Get events ordered by start time ascending
+  // Get the 5 most recent events (descending order)
   const events = await getExternalEvents({
+    limit: 4,
     orderBy: "starts_at",
-    desc: false,
+    desc: true,
   });
 
   if (!events.length) {
     return null;
   }
 
-  const now = new Date();
+  // Get today at midnight for day-only comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  // Prefer the next upcoming event
-  const upcoming = events
-    .map((e) => ({ event: e, start: new Date(e.starts_at) }))
-    .filter(({ start }) => !isNaN(start.getTime()) && start >= now)
-    .sort((a, b) => a.start.getTime() - b.start.getTime());
-
-  if (upcoming.length > 0) {
-    return upcoming[0].event;
-  }
-
-  // If there are no future events, fall back to the most recent past one
-  const latestPast = [...events]
+  // Sort events by start date ascending (earliest first)
+  const sortedEvents = [...events]
     .map((e) => ({ event: e, start: new Date(e.starts_at) }))
     .filter(({ start }) => !isNaN(start.getTime()))
-    .sort((a, b) => b.start.getTime() - a.start.getTime());
+    .sort((a, b) => a.start.getTime() - b.start.getTime());
 
-  return latestPast.length > 0 ? latestPast[0].event : null;
+  // Try to find the first event that is today or in the future (day-only comparison)
+  const upcomingOrToday = sortedEvents.find(({ start }) => {
+    const eventDate = new Date(start);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  });
+
+  if (upcomingOrToday) {
+    return upcomingOrToday.event;
+  }
+
+  // No upcoming events found, return the most recent past event (first in desc order)
+  return events[0];
 }
 
 // ==================

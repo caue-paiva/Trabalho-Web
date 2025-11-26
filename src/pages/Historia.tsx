@@ -176,7 +176,7 @@ const Historia = () => {
             Nossa História
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Conheça a trajetória do Grupy Sanca, desde sua fundação até os dias atuais,
+            Conheça a trajetória do grupy-sanca, desde sua fundação até os dias atuais,
             e como nos tornamos uma referência na comunidade Python regional.
           </p>
         </div>
@@ -192,7 +192,7 @@ const Historia = () => {
             </p>
             <p className="mb-4">
               Inspirados pelos grupos de usuários Python (Grupys) que já existiam em outras cidades como
-              São Paulo, Rio de Janeiro e Campinas, decidimos fundar o Grupy Sanca com o objetivo
+              São Paulo, Rio de Janeiro e Campinas, decidimos fundar o grupy-sanca com o objetivo
               de democratizar o acesso ao conhecimento sobre Python na região.
             </p>
             <p>

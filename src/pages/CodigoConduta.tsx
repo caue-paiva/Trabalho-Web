@@ -23,7 +23,7 @@ const CodigoConduta = () => {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Este código de conduta aplica-se a todos os eventos, espaços online e comunicações
-            relacionadas ao Grupy Sanca.
+            relacionadas ao grupy-sanca.
           </AlertDescription>
         </Alert>
 

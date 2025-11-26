@@ -7,12 +7,12 @@
     "contact": "Contato"
   },
   "home": {
-    "title": "Bem-vindo ao Grupy Sanca",
+    "title": "Bem-vindo ao grupy-sanca",
     "subtitle": "Uma comunidade acolhedora para todos que querem aprender e compartilhar conhecimento sobre Python em São Carlos e região.",
     "learnHistory": "Conheça nossa história",
     "viewEvents": "Ver próximos eventos",
     "whoWeAre": "Quem somos?",
-    "description": "O Grupy Sanca é uma comunidade de usuários da linguagem Python que se reúne regularmente para trocar experiências, aprender juntos e fortalecer o ecossistema tech da região.",
+    "description": "O grupy-sanca é uma comunidade de usuários da linguagem Python que se reúne regularmente para trocar experiências, aprender juntos e fortalecer o ecossistema tech da região.",
     "community": {
       "title": "Comunidade Acolhedora",
       "description": "Um espaço seguro e inclusivo para pessoas de todos os níveis de experiência, desde iniciantes até especialistas."
@@ -47,9 +47,9 @@
   },
   "history": {
     "title": "Nossa História",
-    "subtitle": "Conheça a trajetória do Grupy Sanca, desde sua fundação até os dias atuais, e como nos tornamos uma referência na comunidade Python regional.",
+    "subtitle": "Conheça a trajetória do grupy-sanca, desde sua fundação até os dias atuais, e como nos tornamos uma referência na comunidade Python regional.",
     "howItStarted": "Como tudo começou",
-    "originStory": "Em 2015, um pequeno grupo de entusiastas do Python em São Carlos percebeu a necessidade de criar um espaço local para compartilhar conhecimento e experiências sobre esta linguagem que estava crescendo rapidamente no cenário tecnológico brasileiro. Inspirados pelos grupos de usuários Python (Grupys) que já existiam em outras cidades como São Paulo, Rio de Janeiro e Campinas, decidimos fundar o Grupy Sanca com o objetivo de democratizar o acesso ao conhecimento sobre Python na região. O que começou como encontros informais em cafés e salas emprestadas, rapidamente evoluiu para uma comunidade estruturada que hoje é referência no interior paulista.",
+    "originStory": "Em 2015, um pequeno grupo de entusiastas do Python em São Carlos percebeu a necessidade de criar um espaço local para compartilhar conhecimento e experiências sobre esta linguagem que estava crescendo rapidamente no cenário tecnológico brasileiro. Inspirados pelos grupos de usuários Python (Grupys) que já existiam em outras cidades como São Paulo, Rio de Janeiro e Campinas, decidimos fundar o grupy-sanca com o objetivo de democratizar o acesso ao conhecimento sobre Python na região. O que começou como encontros informais em cafés e salas emprestadas, rapidamente evoluiu para uma comunidade estruturada que hoje é referência no interior paulista.",
     "ourNumbers": "Nossos números",
     "timeline": "Linha do tempo",
     "historicalMoments": "Momentos históricos",
@@ -96,9 +96,9 @@
   "codeOfConduct": {
     "title": "Código de Conduta",
     "subtitle": "Nosso compromisso em manter uma comunidade acolhedora, diversa e respeitosa para todos.",
-    "notice": "Este código de conduta aplica-se a todos os eventos, espaços online e comunicações relacionadas ao Grupy Sanca.",
+    "notice": "Este código de conduta aplica-se a todos os eventos, espaços online e comunicações relacionadas ao grupy-sanca.",
     "mission": "Nossa missão",
-    "missionDescription": "O Grupy Sanca tem o compromisso de ser uma comunidade livre de assédio para todos, independentemente do sexo, identidade de gênero e expressão, idade, orientação sexual, deficiência, aparência física, tamanho corporal, cor de pele, etnia, religião (ou falta dela) ou escolhas de tecnologias. Não toleramos o assédio aos participantes da comunidade, sob qualquer forma. Linguagem e imagens sexuais não são adequadas em nenhum local da comunidade, incluindo palestras, workshops, festas, Twitter e outras mídias on-line.",
+    "missionDescription": "O grupy-sanca tem o compromisso de ser uma comunidade livre de assédio para todos, independentemente do sexo, identidade de gênero e expressão, idade, orientação sexual, deficiência, aparência física, tamanho corporal, cor de pele, etnia, religião (ou falta dela) ou escolhas de tecnologias. Não toleramos o assédio aos participantes da comunidade, sob qualquer forma. Linguagem e imagens sexuais não são adequadas em nenhum local da comunidade, incluindo palestras, workshops, festas, Twitter e outras mídias on-line.",
     "ourValues": "Nossos valores",
     "expectedBehavior": "Comportamentos esperados",
     "unacceptableBehavior": "Comportamentos inaceitáveis",
@@ -146,7 +146,7 @@
     "visitLink": "Acessar",
     "joinUs": {
       "title": "Junte-se a nós!",
-      "description": "Fazer parte do Grupy Sanca é fácil e gratuito. Venha fazer parte desta comunidade incrível!",
+      "description": "Fazer parte do grupy-sanca é fácil e gratuito. Venha fazer parte desta comunidade incrível!",
       "benefits": {
         "events": "Acesso a eventos exclusivos e workshops",
         "networking": "Conecte-se com profissionais da área",
